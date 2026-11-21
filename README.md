@@ -3,7 +3,7 @@
 > **HỌC PHẦN: ĐỒ ÁN CHUYÊN NGÀNH CÔNG NGHỆ PHẦN MỀM (CNPM)**  
 > **Lớp tín chỉ:** Đồ án chuyên ngành CNPM-1-1-26(N05)  
 > **Lớp hành chính:** DCCNTT.14.3  
-> **Nhóm thực hiện:** Nhóm 10  
+> **Nhóm thực hiện:** Nhóm 11  
 > **Thành viên thực hiện:**  
 > 1. **Nguyễn Mạnh Quyết** - MSV: **20231053** *(Phụ trách: Phân hệ Quản lý & Quản trị viên, CSDL, Thuật toán chống xung đột)*  
 > 2. **Hà Thái Bảo** - MSV: **20231045** *(Phụ trách: Phân hệ Khách hàng & Nhân viên quầy, UI/UX, Sơ đồ ghế động & Soát vé QR)*  
