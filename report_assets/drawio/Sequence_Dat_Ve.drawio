@@ -1,0 +1,249 @@
+<mxfile host="app.diagrams.net" modified="2026-11-03T12:00:00.000Z" agent="Antigravity CineStar" version="24.0.0">
+  <diagram id="Seq_DatVe" name="Biểu đồ tuần tự: Đặt vé và Thanh toán">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1200" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="BIỂU ĐỒ TUẦN TỰ: QUY TRÌNH ĐẶT VÉ VÀ THANH TOÁN TRỰC TUYẾN (KHÁCH HÀNG)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;fontFamily=Times New Roman;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="800" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_client" value="Khách hàng&#xa;(Client)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#ffffff;strokeColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="100" y="70" width="100" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_seat" value="&amp;laquo;boundary&amp;raquo;&#xa;GiaoDienChonGhe" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="300" y="70" width="130" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_pay" value="&amp;laquo;boundary&amp;raquo;&#xa;GiaoDienThanhToan" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="510" y="70" width="140" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_ctrl" value="&amp;laquo;control&amp;raquo;&#xa;BookingController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="740" y="70" width="130" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_lock" value="&amp;laquo;entity&amp;raquo;&#xa;SeatLock" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="960" y="70" width="110" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_vnpay" value="&amp;laquo;gateway&amp;raquo;&#xa;CongVNPAY" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#e0f2fe;strokeColor=#0284c7;" vertex="1" parent="1">
+          <mxGeometry x="1150" y="70" width="110" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_book" value="&amp;laquo;entity&amp;raquo;&#xa;Booking &amp;amp; Ticket" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="1330" y="70" width="120" height="980" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m1" value="1. Chọn ghế [D07, D08] và bấm Tiếp tục" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="150" as="sourcePoint" />
+            <mxPoint x="365" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m2" value="2. POST /booking/lock-seats (showtimeId, seatIds)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="365" y="180" as="sourcePoint" />
+            <mxPoint x="805" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m3" value="3. lockSeats(showtimeId, seatIds, 5 phút)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="210" as="sourcePoint" />
+            <mxPoint x="1015" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT FRAME 1 -->
+        <mxCell id="alt1" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=50;height=25;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fillColor=#fafafa;strokeColor=#64748b;fontFamily=Times New Roman;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="240" width="1390" height="260" as="geometry" />
+        </mxCell>
+
+        <mxCell id="guard1_fail" value="[Luồng phụ / Thất bại: Ghế đã có người giữ hoặc đã bán]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#be123c;" vertex="1" parent="alt1">
+          <mxGeometry x="60" y="5" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m5a" value="5a. Phản hồi ghế bận ({success: false, message: 'Ghế bận'})" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="280" as="sourcePoint" />
+            <mxPoint x="805" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m6a" value="6a. Trả về thông báo lỗi xung đột ghế (409 Conflict)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="310" as="sourcePoint" />
+            <mxPoint x="365" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m7a" value="7a. Cảnh báo đỏ: 'Ghế [D07, D08] đã có người chọn giữ chỗ, vui lòng chọn lại!'" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="365" y="340" as="sourcePoint" />
+            <mxPoint x="150" y="340" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="div1" style="endArrow=none;dashed=1;html=1;strokeWidth=1.2;strokeColor=#94a3b8;" edge="1" parent="alt1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="125" as="sourcePoint" />
+            <mxPoint x="1390" y="125" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="guard1_succ" value="[else: Luồng chính / Thành công: Ghế còn trống hợp lệ]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#15803d;" vertex="1" parent="alt1">
+          <mxGeometry x="10" y="130" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m5b" value="5b. INSERT INTO seat_locks (expires_at = NOW() + 5 phút)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="390" as="sourcePoint" />
+            <mxPoint x="1015" y="410" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1045" y="390" />
+              <mxPoint x="1045" y="410" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m6b" value="6b. Phản hồi khóa ghế thành công (200 OK, expiresAt)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1015" y="430" as="sourcePoint" />
+            <mxPoint x="805" y="430" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m7b" value="7b. Chuyển hướng sang giao diện thanh toán đơn hàng" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="455" as="sourcePoint" />
+            <mxPoint x="580" y="455" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m8b" value="8b. Hiển thị form thanh toán &amp;amp; đếm ngược thời gian 05:00" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="480" as="sourcePoint" />
+            <mxPoint x="150" y="480" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Checkout Steps -->
+        <mxCell id="m9" value="9. Chọn combo bắp nước, chọn cổng VNPAY và bấm 'Xác nhận thanh toán'" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="530" as="sourcePoint" />
+            <mxPoint x="580" y="530" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="10. POST /booking/checkout (thông tin khách hàng, bookingData)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="560" as="sourcePoint" />
+            <mxPoint x="805" y="560" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m11" value="11. Khởi tạo giao dịch thanh toán trực tuyến qua cổng VNPAY" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="590" as="sourcePoint" />
+            <mxPoint x="1205" y="590" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT FRAME 2 -->
+        <mxCell id="alt2" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=50;height=25;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fillColor=#fafafa;strokeColor=#64748b;fontFamily=Times New Roman;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="620" width="1390" height="390" as="geometry" />
+        </mxCell>
+
+        <mxCell id="guard2_fail" value="[Luồng phụ / Thất bại: Quá hạn 5 phút hoặc Khách hủy giao dịch thanh toán]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#be123c;" vertex="1" parent="alt2">
+          <mxGeometry x="60" y="5" width="450" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m12a" value="12a. Giao dịch thất bại / Timeout (ResponseCode != 00)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1205" y="660" as="sourcePoint" />
+            <mxPoint x="805" y="660" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m13a" value="13a. releaseLock(): Tự động giải phóng ghế khóa trong CSDL" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="690" as="sourcePoint" />
+            <mxPoint x="1015" y="690" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14a" value="14a. Thông báo lỗi: 'Giao dịch không thành công hoặc quá hạn giữ ghế'" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="720" as="sourcePoint" />
+            <mxPoint x="580" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15a" value="15a. Cảnh báo thất bại, chuyển hướng về trang chọn lại ghế" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="750" as="sourcePoint" />
+            <mxPoint x="150" y="750" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="div2" style="endArrow=none;dashed=1;html=1;strokeWidth=1.2;strokeColor=#94a3b8;" edge="1" parent="alt2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="165" as="sourcePoint" />
+            <mxPoint x="1390" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="guard2_succ" value="[else: Luồng chính / Thành công: Thanh toán VNPAY thành công (ResponseCode = 00)]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#15803d;" vertex="1" parent="alt2">
+          <mxGeometry x="10" y="170" width="480" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m12b" value="12b. Xác nhận thanh toán thành công (VNPAY ResponseCode = 00)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1205" y="810" as="sourcePoint" />
+            <mxPoint x="805" y="810" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m13b" value="13b. createBooking(): Tạo đơn đặt vé mới (status = 'paid')" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="840" as="sourcePoint" />
+            <mxPoint x="1390" y="840" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14b" value="14b. createTickets(): Tạo vé điện tử &amp;amp; sinh mã QR Code bảo mật" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="870" as="sourcePoint" />
+            <mxPoint x="1390" y="870" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15b" value="15b. releaseSession(): Giải phóng khóa giữ ghế trong bảng seat_locks" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="900" as="sourcePoint" />
+            <mxPoint x="1015" y="900" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m16b" value="16b. Phản hồi hoàn tất đặt vé thành công kèm danh sách vé QR Code" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="805" y="930" as="sourcePoint" />
+            <mxPoint x="580" y="930" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m17b" value="17b. THÔNG BÁO XANH: 'ĐẶT VÉ THÀNH CÔNG!' - Hiển thị vé điện tử &amp;amp; mã QR Code" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="580" y="960" as="sourcePoint" />
+            <mxPoint x="150" y="960" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

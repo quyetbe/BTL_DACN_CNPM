@@ -1,0 +1,41 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC15 - QUẢN LÝ NGƯỜI DÙNG, RBAC VÀ CẤU HÌNH RẠP
+
+actor "Quản trị viên" as Admin
+boundary "Giao diện Quản trị" as UI_Admin
+control "Bộ điều khiển Quản trị" as Ctrl
+entity "Tài khoản người dùng" as ModelUser
+database "Cơ sở dữ liệu" as DB
+
+Admin -> UI_Admin: 1. Chọn tài khoản nhân viên và chọn vai trò mới cần cấp
+activate UI_Admin
+
+Admin -> UI_Admin: 2. Nhấn nút "Cập nhật phân quyền"
+UI_Admin -> Ctrl: 3. Gửi yêu cầu thay đổi vai trò của người dùng
+activate Ctrl
+
+Ctrl -> ModelUser: 4. Yêu cầu cập nhật quyền hạn của tài khoản
+activate ModelUser
+
+ModelUser -> DB: 5. Cập nhật vai trò mới và ghi nhật ký giám sát vào CSDL
+activate DB
+DB --> ModelUser: Xác nhận cập nhật quyền hạn thành công
+deactivate DB
+
+ModelUser --> Ctrl: Thông báo hoàn tất phân quyền người dùng
+deactivate ModelUser
+
+Ctrl --> UI_Admin: 6. Phản hồi phân quyền tài khoản thành công
+deactivate Ctrl
+
+UI_Admin --> Admin: 7. Cập nhật nhãn vai trò mới của người dùng trên danh sách
+deactivate UI_Admin
+@enduml

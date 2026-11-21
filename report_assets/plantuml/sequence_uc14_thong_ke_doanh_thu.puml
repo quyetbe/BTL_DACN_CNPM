@@ -1,0 +1,47 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC14 - THỐNG KÊ DOANH THU VÀ TỶ LỆ LẤP ĐẦY
+
+actor "Quản lý rạp" as Manager
+boundary "Bảng điều khiển Thống kê" as UI_Dash
+control "Bộ điều khiển Thống kê" as Ctrl
+entity "Dịch vụ Tổng hợp báo cáo" as ServiceReport
+database "Cơ sở dữ liệu" as DB
+
+Manager -> UI_Dash: 1. Chọn khoảng thời gian thống kê và chọn cụm rạp
+activate UI_Dash
+
+UI_Dash -> Ctrl: 2. Gửi yêu cầu lấy số liệu báo cáo theo bộ lọc
+activate Ctrl
+
+Ctrl -> ServiceReport: 3. Yêu cầu tổng hợp doanh thu và số lượng vé
+activate ServiceReport
+
+ServiceReport -> DB: 4. Truy vấn tổng tiền từ các đơn vé đã thanh toán
+activate DB
+DB --> ServiceReport: Trả về số liệu doanh thu và số vé bán ra
+deactivate DB
+
+ServiceReport -> DB: 5. Truy vấn sức chứa phòng và số ghế đã phục vụ
+activate DB
+DB --> ServiceReport: Trả về số liệu ghế ngồi theo từng suất chiếu
+deactivate DB
+
+ServiceReport -> ServiceReport: 6. Tính toán tổng doanh thu và tỷ lệ lấp đầy phòng chiếu
+ServiceReport --> Ctrl: Cung cấp đầy đủ số liệu thống kê phân tích
+deactivate ServiceReport
+
+Ctrl --> UI_Dash: 7. Trả về tập dữ liệu thống kê hoàn chỉnh
+deactivate Ctrl
+
+UI_Dash -> UI_Dash: 8. Vẽ biểu đồ cột doanh thu và biểu đồ tròn tỷ lệ lấp đầy
+UI_Dash --> Manager: 9. Hiển thị bảng điều khiển báo cáo trực quan cho quản lý
+deactivate UI_Dash
+@enduml

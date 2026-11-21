@@ -1,0 +1,54 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC06 - ĐẶT VÉ TRỰC TUYẾN VÀ THANH TOÁN
+
+actor "Khách hàng" as Client
+boundary "Giao diện Thanh toán" as UI_Pay
+control "Bộ điều khiển Thanh toán" as Ctrl
+entity "Đơn đặt vé" as ModelBooking
+database "Cơ sở dữ liệu" as DB
+boundary "Cổng thanh toán trực tuyến" as Gateway
+
+Client -> UI_Pay: 1. Chọn phương thức thanh toán và bấm "Thanh toán"
+activate UI_Pay
+
+UI_Pay -> Ctrl: 2. Gửi yêu cầu khởi tạo giao dịch thanh toán
+activate Ctrl
+
+Ctrl -> Gateway: 3. Yêu cầu cổng thanh toán tạo phiên giao dịch mới
+activate Gateway
+Gateway --> Ctrl: Cung cấp đường dẫn trang thanh toán an toàn
+Ctrl --> UI_Pay: 4. Chuyển hướng sang giao diện cổng thanh toán
+deactivate Ctrl
+
+UI_Pay --> Client: 5. Hiển thị màn hình quét mã thanh toán ngân hàng
+Client -> Gateway: 6. Khách hàng thực hiện quét mã thanh toán trên ứng dụng
+Gateway -> Gateway: 7. Xác thực và trừ tiền trong tài khoản khách hàng
+Gateway -> Ctrl: 8. Gửi tín hiệu thông báo thanh toán thành công
+activate Ctrl
+deactivate Gateway
+
+Ctrl -> ModelBooking: 9. Yêu cầu xác nhận đơn vé và cấp vé điện tử
+activate ModelBooking
+
+ModelBooking -> DB: 10. Cập nhật đơn vé thành đã thanh toán, lưu vé và giải phóng khóa ghế
+activate DB
+DB --> ModelBooking: Xác nhận lưu trữ giao dịch thành công
+deactivate DB
+
+ModelBooking --> Ctrl: Cung cấp thông tin đơn vé hoàn tất
+deactivate ModelBooking
+
+Ctrl --> UI_Pay: 11. Chuyển hướng sang trang hoàn thành đặt vé
+deactivate Ctrl
+
+UI_Pay --> Client: 12. Hiển thị vé xem phim điện tử kèm mã QR Code
+deactivate UI_Pay
+@enduml

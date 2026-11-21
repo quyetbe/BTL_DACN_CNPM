@@ -1,0 +1,48 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình POS dành cho Thu ngân quầy vé;
+:Thu ngân chọn phim, ngày chiếu và suất chiếu theo yêu cầu khách;
+:Mở sơ đồ phòng chiếu và chọn ghế cho khách;
+:Hỏi nhu cầu bắp nước và thêm combo vào đơn hàng (nếu có);
+:Xác nhận tổng tiền thanh toán với khách hàng;
+repeat :Chọn hình thức thanh toán (Tiền mặt / Quẹt thẻ / QR POS);
+  :Thu ngân thực hiện giao dịch thu tiền;
+backward: Giao dịch thẻ lỗi / Khách đổi ý;
+repeat while (Thu tiền thành công?) is ([Chưa hoàn tất]) not ([Hoàn tất])
+:Hệ thống ghi nhận đơn vé POS và khóa ghế chính thức;
+:Máy in nhiệt POS tự động in vé xem phim cứng;
+:Thu ngân trao vé cứng và hóa đơn cho khách hàng;
+stop
+@enduml

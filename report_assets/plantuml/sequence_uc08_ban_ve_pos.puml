@@ -1,0 +1,44 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC08 - BÁN VÉ TẠI QUẦY (POS) VÀ IN HÓA ĐƠN
+
+actor "Nhân viên quầy" as Staff
+boundary "Giao diện Bán vé quầy" as UI_POS
+control "Bộ điều khiển Bán vé quầy" as Ctrl
+entity "Đơn đặt vé" as ModelBooking
+database "Cơ sở dữ liệu" as DB
+
+Staff -> UI_POS: 1. Chọn suất chiếu và ghế ngồi theo yêu cầu của khách
+activate UI_POS
+
+Staff -> UI_POS: 2. Chọn thêm combo bắp nước (nếu khách mua thêm)
+Staff -> UI_POS: 3. Lựa chọn hình thức thanh toán của khách hàng
+Staff -> UI_POS: 4. Bấm nút "Xuất vé bán tại quầy"
+UI_POS -> Ctrl: 5. Gửi thông tin đơn vé quầy lên máy chủ
+activate Ctrl
+
+Ctrl -> ModelBooking: 6. Yêu cầu tạo đơn đặt vé trực tiếp tại quầy
+activate ModelBooking
+
+ModelBooking -> DB: 7. Lưu đơn vé, chi tiết các vé và combo vào CSDL
+activate DB
+DB --> ModelBooking: Xác nhận lưu trữ đơn vé thành công
+deactivate DB
+
+ModelBooking --> Ctrl: Cung cấp đối tượng đơn vé quầy hoàn tất
+deactivate ModelBooking
+
+Ctrl -> Ctrl: 8. Sinh mã QR vé và tạo lệnh in hóa đơn bán vé
+Ctrl --> UI_POS: 9. Gửi dữ liệu vé và lệnh in xuống máy in quầy
+deactivate Ctrl
+
+UI_POS --> Staff: 10. Kích hoạt máy in vé và hiển thị thông báo thành công
+deactivate UI_POS
+@enduml

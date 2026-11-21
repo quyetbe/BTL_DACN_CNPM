@@ -1,0 +1,72 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam linetype ortho
+skinparam roundCorner 0
+skinparam dpi 300
+
+title BIỂU ĐỒ TUẦN TỰ: LẬP SUẤT CHIẾU VÀ KIỂM TRA XUNG ĐỘT (MANAGER)
+
+actor "Quản lý (Manager)" as Mgr
+boundary "Giao diện Xếp lịch" as UI_Showtime
+control "ManagerController" as Ctrl
+participant "ConflictDetector" as ServiceConflict
+entity "Showtime" as ModelShowtime
+database "Cơ sở dữ liệu" as DB
+
+Mgr -> UI_Showtime: 1. Chọn Phim, Phòng chiếu, Ngày và Giờ bắt đầu
+activate UI_Showtime
+
+UI_Showtime -> Ctrl: 2. AJAX GET /manager/showtimes/check-conflict
+activate Ctrl
+
+Ctrl -> ServiceConflict: 3. checkConflict(roomId, startTime, duration, buffer)
+activate ServiceConflict
+
+ServiceConflict -> DB: 4. SELECT * FROM showtimes WHERE room_id = ? AND date = ?
+activate DB
+DB --> ServiceConflict: Danh sách suất chiếu hiện có trong phòng
+deactivate DB
+
+ServiceConflict -> ServiceConflict: 5. Tính T_end = T_start + duration + buffer\nKiểm tra: T_new_start < T_old_end AND T_new_end > T_old_start
+
+alt Phát hiện xung đột lịch chiếu
+    ServiceConflict --> Ctrl: {hasConflict: true, conflictInfo, message}
+    Ctrl --> UI_Showtime: Phản hồi xung đột (cảnh báo đỏ)
+    UI_Showtime --> Mgr: Hiển thị thông báo trùng lịch, khóa nút Lưu
+else Không có xung đột (Khung giờ an toàn)
+    ServiceConflict --> Ctrl: {hasConflict: false, message: "Phòng trống"}
+    deactivate ServiceConflict
+    Ctrl --> UI_Showtime: Phản hồi hợp lệ (thông báo xanh)
+    deactivate Ctrl
+    UI_Showtime --> Mgr: Kích hoạt nút Lưu suất chiếu
+end
+
+Mgr -> UI_Showtime: 6. Nhập giá vé cơ bản và ấn "Lưu suất chiếu"
+UI_Showtime -> Ctrl: 7. POST /manager/showtimes/create (dữ liệu suất chiếu)
+activate Ctrl
+
+Ctrl -> ServiceConflict: 8. Xác thực lại lần cuối (checkConflict)
+activate ServiceConflict
+ServiceConflict --> Ctrl: Xác nhận an toàn
+deactivate ServiceConflict
+
+Ctrl -> ModelShowtime: 9. createShowtime(movieId, roomId, start, end, basePrice)
+activate ModelShowtime
+
+ModelShowtime -> DB: 10. INSERT INTO showtimes (movie_id, room_id, start_time, end_time,...)
+activate DB
+DB --> ModelShowtime: showtime_id mới
+deactivate DB
+
+ModelShowtime --> Ctrl: Kết quả thêm mới thành công
+deactivate ModelShowtime
+
+Ctrl --> UI_Showtime: 11. Chuyển hướng về danh sách suất chiếu kèm thông báo thành công
+deactivate Ctrl
+UI_Showtime --> Mgr: 12. Hiển thị thông báo thêm suất chiếu thành công trên giao diện
+deactivate UI_Showtime
+
+@enduml

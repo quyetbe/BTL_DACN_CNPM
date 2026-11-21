@@ -1,0 +1,46 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Giao diện Xác nhận đơn đặt vé;
+:Kiểm tra lại thông tin vé, ghế, combo và tổng tiền;
+:Chọn cổng thanh toán điện tử (VNPay / MoMo / Thẻ ngân hàng);
+repeat :Khách quét mã QR / Nhập thông tin thanh toán;
+  :Cổng thanh toán xử lý giao dịch;
+backward: Giao dịch thất bại / Quá hạn 5 phút (Nhả ghế về trống);
+repeat while (Thanh toán thành công?) is ([Thất bại / Quá hạn]) not ([Thành công])
+:Ghi nhận đơn đặt vé chính thức vào CSDL;
+:Sinh mã vé điện tử QR Code bảo mật;
+:Gửi email xác nhận kèm vé điện tử cho khách hàng;
+stop
+@enduml

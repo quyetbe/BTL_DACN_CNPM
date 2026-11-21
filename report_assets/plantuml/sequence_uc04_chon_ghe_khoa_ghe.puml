@@ -1,0 +1,51 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC04 - CHỌN GHẾ NGỒI VÀ KHÓA TẠM THỜI 5 PHÚT
+
+actor "Khách hàng" as Client
+boundary "Giao diện Chọn ghế" as UI_Seat
+control "Bộ điều khiển Đặt vé" as Ctrl
+entity "Khóa giữ ghế" as ModelLock
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_Seat: 1. Nhấp chọn các vị trí ghế ngồi trên sơ đồ
+activate UI_Seat
+
+UI_Seat -> UI_Seat: 2. Tự động tính tổng tiền tạm tính theo loại ghế
+
+Client -> UI_Seat: 3. Nhấn nút "Tiếp tục" để giữ chỗ
+UI_Seat -> Ctrl: 4. Gửi yêu cầu khóa giữ các ghế đã chọn
+activate Ctrl
+
+Ctrl -> ModelLock: 5. Yêu cầu kiểm tra và giữ ghế tạm thời cho khách
+activate ModelLock
+
+ModelLock -> DB: 6. Kiểm tra trạng thái hiện tại của các ghế được chọn
+activate DB
+DB --> ModelLock: Trả về danh sách ghế đang bị giữ hoặc đã bán
+deactivate DB
+
+alt Các ghế đã chọn đều còn trống hợp lệ
+  ModelLock -> DB: 7a. Lưu bản ghi khóa giữ ghế tạm thời trong 5 phút
+  activate DB
+  DB --> ModelLock: Xác nhận khóa giữ ghế thành công
+  deactivate DB
+  ModelLock --> Ctrl: Thông báo các vị trí ghế đã được khóa giữ
+  Ctrl --> UI_Seat: 8a. Phản hồi thành công và kích hoạt đếm ngược 5 phút
+  UI_Seat --> Client: 9a. Chuyển tiếp sang bước chọn bắp nước đi kèm
+else Có ghế đã bị người khác chọn trước đó
+  ModelLock --> Ctrl: Thông báo ghế đã bị giữ bởi khách hàng khác
+  deactivate ModelLock
+  Ctrl --> UI_Seat: 8b. Báo lỗi xung đột ghế vừa có người chọn
+  UI_Seat --> Client: 9b. Cập nhật màu ghế bị giữ và yêu cầu chọn lại
+end
+deactivate Ctrl
+deactivate UI_Seat
+@enduml

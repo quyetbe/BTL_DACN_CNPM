@@ -1,0 +1,51 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Quản lý Phim của Quản trị viên;
+:Hiển thị danh sách toàn bộ phim trong hệ thống;
+if (Chọn tác vụ quản lý?) then ([Thêm phim mới])
+  repeat :Nhập tên phim, thể loại, thời lượng, trailer, áp phích;
+    :Nhấn nút "Lưu phim mới";
+  backward: Thiếu thông tin bắt buộc / Thời lượng không hợp lệ;
+  repeat while (Thông tin hợp lệ?) is ([Không hợp lệ]) not ([Hợp lệ])
+  :Thêm bản ghi phim mới vào CSDL;
+  :Cập nhật và làm mới danh sách phim hiển thị;
+else ([Cập nhật / Ngừng chiếu])
+  :Chọn phim cần chỉnh sửa trong danh sách;
+  :Cập nhật trạng thái phim (Đang chiếu / Ngừng chiếu / Sắp chiếu);
+  :Lưu thông tin thay đổi vào CSDL;
+  :Cập nhật và làm mới danh sách phim hiển thị;
+endif
+stop
+@enduml

@@ -1,0 +1,147 @@
+﻿Bảng 0.1. Phân công nhiệm vụ chi tiết giữa các thành viên Nhóm 10 ===> Page 2
+Bảng 0.2. Danh mục thuật ngữ và các từ viết tắt trong đồ án ===> Page 8
+CHƯƠNG I. TỔNG QUAN VỀ ĐỀ TÀI ===> Page 12
+Bảng 1.1. Ma trận đối chuẩn 20 tiêu chuẩn an toàn bảo mật hệ thống Cinestar Cinema ===> Page 18
+CHƯƠNG II. TỔNG HỢP, PHÂN TÍCH VÀ ĐÁNH GIÁ THỰC TẾ ===> Page 21
+Bảng 2.1. Bảng tổng hợp nội dung khảo sát hệ thống rạp chiếu phim ===> Page 24
+Bảng 2.2. Bảng tổng hợp kết quả phân tích khảo sát ===> Page 25
+Bảng 2.3. Ma trận phân quyền RBAC giữa các nhóm người dùng trong hệ thống ===> Page 27
+Bảng 2.4. Bảng đặc tả yêu cầu phi chức năng theo chuẩn quốc tế ISO/IEC 25010 ===> Page 32
+CHƯƠNG III. CƠ SỞ LÝ THUYẾT ===> Page 34
+CHƯƠNG IV. PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG ===> Page 39
+4.1.1. Xác định Use Case cho các tác nhân ===> Page 39
+4.1.2. Mô tả Use Case chi tiết (Use Case Specifications) ===> Page 39
+Bảng 4.1. Đặc tả Use Case UC01: Đăng ký / Đăng nhập tài khoản ===> Page 39
+Bảng 4.2. Đặc tả Use Case UC02: Đặt vé trực tuyến & Chọn ghế ngồi ===> Page 40
+Bảng 4.3. Đặc tả Use Case UC03: Bán vé trực tiếp tại quầy POS ===> Page 40
+Bảng 4.4. Đặc tả Use Case UC04: Quét mã QR Soát vé & Báo gian lận ===> Page 41
+Bảng 4.5. Đặc tả Use Case UC05: Lập lịch suất chiếu chống trùng giờ ===> Page 41
+Bảng 4.6. Đặc tả Use Case UC06: Quản lý danh mục phim chiếu rạp ===> Page 42
+Bảng 4.7. Đặc tả Use Case UC07: Quản lý phòng chiếu & Cấu hình ghế ===> Page 42
+Bảng 4.8. Đặc tả Use Case UC08: Thống kê doanh thu & Tỷ lệ lấp đầy ===> Page 43
+4.1.3. Biểu đồ phân cấp chức năng (FDD - Functional Decomposition Diagram) ===> Page 43
+Hình 4.1. Biểu đồ phân cấp chức năng hệ thống (FDD) ===> Page 44
+4.1.4. Biểu đồ Use Case (Tổng quát và Phân rã theo nhóm chức năng) ===> Page 44
+Hình 4.2. Biểu đồ Use Case tổng quát hệ thống rạp chiếu phim ===> Page 45
+Hình 4.3. Biểu đồ phân rã Use Case Đăng ký và Đăng nhập ===> Page 45
+Hình 4.4. Biểu đồ phân rã Use Case Tra cứu phim và Xem lịch chiếu ===> Page 46
+Hình 4.5. Biểu đồ phân rã Use Case Đặt vé trực tuyến và Chọn ghế ===> Page 46
+Hình 4.6. Biểu đồ phân rã Use Case Bán vé tại quầy và Soát vé QR ===> Page 46
+Hình 4.7. Biểu đồ phân rã Use Case Quản lý rạp và Lập lịch suất chiếu ===> Page 47
+Hình 4.8. Biểu đồ phân rã Use Case Thống kê báo cáo và Quản trị hệ thống ===> Page 47
+4.1.5. Biểu đồ hoạt động (Activity Diagrams) ===> Page 47
+Hình 4.9. Biểu đồ hoạt động: UC01 - Đăng ký và Đăng nhập tài khoản ===> Page 48
+Hình 4.10. Biểu đồ hoạt động: UC02 - Tra cứu danh mục phim và Xem chi tiết ===> Page 48
+Hình 4.11. Biểu đồ hoạt động: UC03 - Xem lịch chiếu theo cụm rạp và ngày ===> Page 48
+Hình 4.12. Biểu đồ hoạt động: UC04 - Chọn ghế ngồi và Khóa tạm thời 5 phút ===> Page 49
+Hình 4.13. Biểu đồ hoạt động: UC05 - Chọn combo bắp nước (F&B) ===> Page 49
+Hình 4.14. Biểu đồ hoạt động: UC06 - Đặt vé trực tuyến và Thanh toán ===> Page 49
+Hình 4.15. Biểu đồ hoạt động: UC07 - Quản lý vé cá nhân và Xuất trình QR ===> Page 50
+Hình 4.16. Biểu đồ hoạt động: UC08 - Bán vé tại quầy (POS) và In hóa đơn ===> Page 50
+Hình 4.17. Biểu đồ hoạt động: UC09 - Quét mã QR soát vé qua camera ===> Page 51
+Hình 4.18. Biểu đồ hoạt động: UC10 - Đối soát vé và Cảnh báo gian lận ===> Page 51
+Hình 4.19. Biểu đồ hoạt động: UC11 - Quản lý danh mục phim và Poster ===> Page 51
+Hình 4.20. Biểu đồ hoạt động: UC12 - Quản lý phòng chiếu và Ghế bảo trì ===> Page 52
+Hình 4.21. Biểu đồ hoạt động: UC13 - Lập suất chiếu và Kiểm tra xung đột ===> Page 52
+Hình 4.22. Biểu đồ hoạt động: UC14 - Thống kê doanh thu và Tỷ lệ lấp đầy ===> Page 53
+Hình 4.23. Biểu đồ hoạt động: UC15 - Quản lý người dùng, RBAC và Cấu hình rạp ===> Page 54
+4.2.1. Thiết kế hướng đối tượng và kiến trúc phân tầng MVC ===> Page 54
+Hình 4.24. Biểu đồ lớp theo mô hình MVC: Nhóm Model và Thực thể CSDL ===> Page 55
+Hình 4.25. Biểu đồ lớp theo mô hình MVC: Nhóm Controller và Service ===> Page 56
+Hình 4.26. Biểu đồ tuần tự: UC01 - Đăng ký và Đăng nhập tài khoản ===> Page 56
+Hình 4.27. Biểu đồ tuần tự: UC02 - Tra cứu phim và Xem thông tin chi tiết ===> Page 57
+Hình 4.28. Biểu đồ tuần tự: UC03 - Xem lịch chiếu theo cụm rạp và ngày ===> Page 57
+Hình 4.29. Biểu đồ tuần tự: UC04 - Chọn ghế ngồi và Khóa tạm thời 5 phút ===> Page 58
+Hình 4.30. Biểu đồ tuần tự: UC05 - Chọn combo bắp nước (F&B) ===> Page 58
+Hình 4.31. Biểu đồ tuần tự: UC06 - Đặt vé trực tuyến và Thanh toán ===> Page 59
+Hình 4.32. Biểu đồ tuần tự: UC07 - Quản lý vé cá nhân và Xuất trình QR ===> Page 59
+Hình 4.33. Biểu đồ tuần tự: UC08 - Bán vé tại quầy (POS) và In hóa đơn ===> Page 60
+Hình 4.34. Biểu đồ tuần tự: UC09 - Quét mã QR soát vé qua camera ===> Page 60
+Hình 4.35. Biểu đồ tuần tự: UC10 - Đối soát vé và Cảnh báo gian lận ===> Page 61
+Hình 4.36. Biểu đồ tuần tự: UC11 - Quản lý danh mục phim và Poster ===> Page 61
+Hình 4.37. Biểu đồ tuần tự: UC12 - Quản lý phòng chiếu và Ghế bảo trì ===> Page 62
+Hình 4.38. Biểu đồ tuần tự: UC13 - Lập suất chiếu và Kiểm tra xung đột ===> Page 62
+Hình 4.39. Biểu đồ tuần tự: UC14 - Thống kê doanh thu và Tỷ lệ lấp đầy ===> Page 63
+Hình 4.40. Biểu đồ tuần tự: UC15 - Quản lý người dùng, RBAC và Cấu hình rạp ===> Page 63
+Hình 4.41. Biểu đồ chuyển trạng thái của Ghế ngồi ===> Page 64
+Hình 4.42. Biểu đồ chuyển trạng thái của Vé xem phim ===> Page 64
+4.2.2. Thiết kế cơ sở dữ liệu chuẩn hóa 3NF có phân quyền RBAC ===> Page 64
+Hình 4.43. Sơ đồ quan hệ thực thể (ERD) chuẩn hóa 3NF có phân quyền RBAC ===> Page 65
+Bảng 4.9. Cấu trúc bảng CSDL Roles (Vai trò người dùng) ===> Page 65
+Bảng 4.10. Cấu trúc bảng CSDL Users (Tài khoản người dùng) ===> Page 65
+Bảng 4.11. Cấu trúc bảng CSDL Movies (Thông tin phim chiếu) ===> Page 66
+Bảng 4.12. Cấu trúc bảng CSDL Rooms (Phòng chiếu phim) ===> Page 67
+Bảng 4.13. Cấu trúc bảng CSDL Seats (Ghế ngồi trong phòng) ===> Page 67
+Bảng 4.14. Cấu trúc bảng CSDL Showtimes (Lịch suất chiếu) ===> Page 67
+Bảng 4.15. Cấu trúc bảng CSDL Combos (Combo bắp nước) ===> Page 68
+Bảng 4.16. Cấu trúc bảng CSDL Bookings (Đơn đặt vé) ===> Page 68
+Bảng 4.17. Cấu trúc bảng CSDL Tickets (Chi tiết vé điện tử) ===> Page 69
+Bảng 4.18. Cấu trúc bảng CSDL Booking_Combos (Chi tiết combo theo đơn) ===> Page 70
+Bảng 4.19. Cấu trúc bảng CSDL Seat_Locks (Khóa giữ ghế tạm thời) ===> Page 70
+Bảng 4.20. Cấu trúc bảng CSDL System_Settings (Cấu hình rạp) ===> Page 70
+4.2.3. Thiết kế giao diện người dùng (Wireframes phác thảo) ===> Page 71
+4.2.3.1. Thiết kế phác thảo Màn hình Sơ đồ chọn ghế xem phim (Seat Selection Wireframe) ===> Page 72
+Hình 4.44. Thiết kế giao diện phác thảo: Màn hình Sơ đồ chọn ghế xem phim ===> Page 73
+4.2.3.2. Thiết kế phác thảo Màn hình Trang chủ (Home Page Wireframe) ===> Page 73
+Hình 4.45. Thiết kế giao diện phác thảo: Màn hình Trang chủ khách hàng ===> Page 73
+4.2.3.3. Thiết kế phác thảo Màn hình Lập suất chiếu chống xung đột (Manager Showtimes) ===> Page 73
+Hình 4.46. Thiết kế giao diện phác thảo: Màn hình Lập suất chiếu chống xung đột ===> Page 74
+4.2.3.4. Thiết kế phác thảo Màn hình Soát vé QR & Bán vé quầy POS (Staff Portal) ===> Page 74
+Hình 4.47. Thiết kế giao diện phác thảo: Màn hình Soát vé QR và Bán vé quầy POS ===> Page 74
+4.2.3.5. Thiết kế phác thảo Màn hình Dashboard quản lý doanh thu (Manager Analytics) ===> Page 74
+Hình 4.48. Thiết kế giao diện phác thảo: Màn hình Dashboard quản lý doanh thu ===> Page 75
+CHƯƠNG V. CÀI ĐẶT VÀ TRIỂN KHAI ===> Page 76
+5.1. Cài đặt hệ sinh thái MVC ===> Page 76
+5.1.1. Cài đặt môi trường phát triển & Cấu trúc thư mục MVC ===> Page 76
+5.1.2. Cài đặt Backend ===> Page 77
+5.1.3. Cài đặt Frontend ===> Page 77
+5.2. Kết quả triển khai chức năng và giao diện ===> Page 77
+5.2.1. Phân hệ Khách hàng (Client Portal) ===> Page 77
+Hình 5.1. Giao diện Đăng nhập hệ thống tích hợp tính năng Đăng nhập Demo 1-Click ===> Page 78
+Hình 5.2. Giao diện Đăng ký tài khoản thành viên trực tuyến ===> Page 78
+Hình 5.3. Giao diện Trang chủ hệ thống với danh mục phim và banner bom tấn ===> Page 78
+Hình 5.4. Giao diện Danh mục toàn bộ phim đang chiếu và phim sắp chiếu ===> Page 79
+Hình 5.5. Giao diện Trang thông tin chi tiết phim, Trailer và Lịch chiếu rạp ===> Page 79
+Hình 5.6. Giao diện Sơ đồ chọn ghế ngồi trực quan và đồng hồ giữ ghế 5 phút ===> Page 80
+Hình 5.7. Giao diện Chọn gói Combo bắp nước và đồ uống F&B đi kèm ===> Page 80
+Hình 5.8. Giao diện Xác nhận đơn đặt vé và Lựa chọn cổng thanh toán ===> Page 80
+Hình 5.9. Giao diện Cấp vé điện tử QR Code bảo mật sau thanh toán thành công ===> Page 80
+Hình 5.10. Giao diện Quản lý vé cá nhân và danh sách vé đã mua của khách hàng ===> Page 81
+Hình 5.11. Giao diện Bảng giá vé tiêu chuẩn và Chính sách ưu đãi cụm rạp ===> Page 81
+Hình 5.12. Giao diện Giới thiệu cụm rạp và Hệ thống rạp chiếu Cinestar ===> Page 81
+Hình 5.13. Giao diện Hồ sơ tài khoản cá nhân và Đổi mật khẩu khách hàng ===> Page 82
+5.2.2. Phân hệ Nhân viên quầy (Staff Portal) ===> Page 82
+Hình 5.14. Giao diện Hệ thống bán vé trực tiếp tại quầy (POS Counter) ===> Page 82
+Hình 5.15. Giao diện Soát vé QR qua camera và Ngăn chặn gian lận vé tại cửa rạp ===> Page 83
+Hình 5.16. Giao diện Lịch sử ca trực bán vé và soát vé của nhân viên quầy ===> Page 83
+5.2.3. Phân hệ Quản lý rạp (Manager Portal) ===> Page 83
+Hình 5.17. Giao diện Bảng điều khiển Quản lý (Dashboard) và Biểu đồ doanh thu rạp ===> Page 83
+Hình 5.18. Giao diện Quản lý danh mục phim chiếu rạp và Thời lượng ===> Page 84
+Hình 5.19. Giao diện Thêm mới và Chỉnh sửa thông tin phim chiếu rạp ===> Page 84
+Hình 5.20. Giao diện Quản lý danh sách phòng chiếu và Cấu hình ghế ===> Page 84
+Hình 5.21. Giao diện Chi tiết sơ đồ bố cục phòng chiếu và Đổi trạng thái ghế bảo trì ===> Page 85
+Hình 5.22. Giao diện Quản lý danh sách lịch suất chiếu theo ngày và rạp ===> Page 85
+Hình 5.23. Giao diện Lập lịch suất chiếu mới tích hợp Thuật toán chống xung đột ===> Page 85
+Hình 5.24. Giao diện Quản lý gói Combo bắp nước và Đơn giá F&B ===> Page 86
+Hình 5.25. Giao diện Báo cáo thống kê doanh thu và Tỷ lệ lấp đầy chuyên sâu ===> Page 86
+5.2.4. Phân hệ Quản trị hệ thống (Admin Portal) ===> Page 86
+Hình 5.26. Giao diện Quản lý tài khoản người dùng và Phân quyền vai trò RBAC ===> Page 87
+Hình 5.27. Giao diện Thêm mới tài khoản và Thiết lập quyền hạn người dùng ===> Page 87
+Hình 5.28. Giao diện Theo dõi Nhật ký kiểm toán an ninh hệ thống (Audit Logs) ===> Page 87
+Hình 5.29. Giao diện Cấu hình tham số hệ thống và Thời gian giữ ghế tạm ===> Page 88
+5.3. Kiểm thử hệ thống ===> Page 88
+5.3.1. Mục tiêu và phạm vi kiểm thử ===> Page 88
+5.3.2. Phương pháp và bộ kịch bản kiểm thử (Test Cases) ===> Page 88
+Bảng 5.1. Bảng kịch bản 17 ca kiểm thử (Test Cases) chi tiết của hệ thống ===> Page 88
+5.3.3. Thực hiện kiểm thử và kết quả kiểm thử tự động ===> Page 89
+Bảng 5.2. Kết quả kiểm thử tự động (Automated Test Suite) đạt 17/17 PASS ===> Page 89
+5.3.4. Đánh giá các chỉ số chất lượng phi chức năng ===> Page 90
+Bảng 5.3. Bảng đo lường thực tế các chỉ số phi chức năng của hệ thống ===> Page 90
+5.4. Chuẩn bị nội dung vấn đáp bảo vệ đồ án ===> Page 91
+5.4.1. Nhóm câu hỏi về tính năng và nghiệp vụ ứng dụng (1,0 điểm) ===> Page 91
+5.4.2. Nhóm câu hỏi về luồng dữ liệu (Data Flow) và kiến trúc MVC (1,0 điểm) ===> Page 91
+5.4.3. Nhóm câu hỏi về kiểm thử phần mềm (1,0 điểm) ===> Page 91
+5.4.4. Nhóm câu hỏi về các chỉ số phi chức năng (1,0 điểm) ===> Page 91
+KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN ===> Page 92
+TÀI LIỆU THAM KHẢO ===> Page 94
+PHỤ LỤC: HƯỚNG DẪN CÀI ĐẶT & TÀI KHOẢN MẪU ===> Page 95

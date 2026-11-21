@@ -1,0 +1,53 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam linetype ortho
+skinparam roundCorner 0
+skinparam dpi 300
+
+title BIỂU ĐỒ TUẦN TỰ: SOÁT VÉ QR VÀ CẢNH BÁO GIAN LẬN (STAFF)
+
+actor "Nhân viên soát vé" as Staff
+boundary "Giao diện Soát vé QR" as UI_Scan
+control "StaffController" as Ctrl
+entity "Ticket" as ModelTicket
+database "Cơ sở dữ liệu" as DB
+
+Staff -> UI_Scan: 1. Hướng camera quét mã QR trên vé khách hàng
+activate UI_Scan
+
+UI_Scan -> Ctrl: 2. POST /staff/tickets/checkin (ticketCode: "TKT-20261013-D05")
+activate Ctrl
+
+Ctrl -> ModelTicket: 3. checkIn(ticketCode, staffUserId)
+activate ModelTicket
+
+ModelTicket -> DB: 4. SELECT * FROM tickets WHERE ticket_code = ?
+activate DB
+DB --> ModelTicket: Bản ghi vé tìm thấy
+deactivate DB
+
+alt Trường hợp 1: Mã vé không tồn tại trong hệ thống
+    ModelTicket --> Ctrl: {success: false, status: 'not_found', message: 'Vé không hợp lệ'}
+    Ctrl --> UI_Scan: Phản hồi mã lỗi vé giả mạo
+    UI_Scan --> Staff: Báo động ĐỎ: "VÉ KHÔNG HỢP LỆ HOẶC VÉ GIẢ MẠO!"
+else Trường hợp 2: Vé đã qua sử dụng (status == 'checked_in')
+    ModelTicket --> Ctrl: {success: false, status: 'already_used', checkedInAt, staffName}
+    Ctrl --> UI_Scan: Phản hồi cảnh báo gian lận
+    UI_Scan --> Staff: CẢNH BÁO ĐỎ: "VÉ ĐÃ QUA SỬ DỤNG VÀO LÚC... BỞI NHÂN VIÊN...!"
+else Trường hợp 3: Vé hợp lệ chưa sử dụng (status == 'unused')
+    ModelTicket -> DB: 5. UPDATE tickets SET status = 'checked_in', checked_in_at = NOW(), checked_in_by = staffUserId WHERE ticket_code = ?
+    activate DB
+    DB --> ModelTicket: Cập nhật thành công (affectedRows = 1)
+    deactivate DB
+    ModelTicket --> Ctrl: {success: true, ticketInfo: {movie, room, seat, showtime}}
+    deactivate ModelTicket
+    Ctrl --> UI_Scan: Phản hồi soát vé thành công
+    deactivate Ctrl
+    UI_Scan --> Staff: THÔNG BÁO XANH: "SOÁT VÉ THÀNH CÔNG! Ghế: D05, Phim: Dune"
+    deactivate UI_Scan
+end
+
+@enduml

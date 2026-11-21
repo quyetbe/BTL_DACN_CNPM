@@ -1,0 +1,46 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC01 - ĐĂNG KÝ VÀ ĐĂNG NHẬP TÀI KHOẢN
+
+actor "Người dùng" as User
+boundary "Giao diện Đăng nhập" as UI_Login
+control "Bộ điều khiển Xác thực" as Ctrl
+entity "Tài khoản người dùng" as ModelUser
+database "Cơ sở dữ liệu" as DB
+
+User -> UI_Login: 1. Nhập thông tin Email và Mật khẩu
+activate UI_Login
+
+UI_Login -> Ctrl: 2. Gửi thông tin đăng nhập lên máy chủ
+activate Ctrl
+
+Ctrl -> ModelUser: 3. Yêu cầu tìm kiếm tài khoản theo Email
+activate ModelUser
+
+ModelUser -> DB: 4. Truy vấn thông tin người dùng từ cơ sở dữ liệu
+activate DB
+DB --> ModelUser: Trả về bản ghi thông tin người dùng
+deactivate DB
+
+ModelUser --> Ctrl: Cung cấp đối tượng tài khoản người dùng
+deactivate ModelUser
+
+Ctrl -> Ctrl: 5. So khớp mật khẩu và kiểm tra trạng thái hoạt động
+alt Mật khẩu chính xác và tài khoản đang hoạt động
+  Ctrl -> Ctrl: 6. Khởi tạo phiên làm việc của người dùng
+  Ctrl --> UI_Login: 7a. Điều hướng người dùng vào hệ thống
+  UI_Login --> User: 8a. Hiển thị giao diện chính tương ứng vai trò
+else Sai mật khẩu hoặc tài khoản đã bị khóa
+  Ctrl --> UI_Login: 7b. Trả về thông báo lỗi đăng nhập thất bại
+  UI_Login --> User: 8b. Hiển thị thông báo lỗi trên màn hình
+end
+deactivate Ctrl
+deactivate UI_Login
+@enduml

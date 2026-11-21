@@ -1,0 +1,48 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Báo cáo Thống kê Doanh thu;
+:Chọn khoảng thời gian báo cáo (Ngày / Tuần / Tháng / Năm);
+:Chọn tiêu chí phân tích (Theo phim, Theo rạp, Theo loại ghế, F&B);
+:Nhấn nút "Tạo báo cáo thống kê";
+:Hệ thống tổng hợp và tính toán dữ liệu từ đơn hàng;
+:Hiển thị biểu đồ trực quan và bảng số liệu doanh thu chi tiết;
+if (Khách hàng muốn xuất file?) then ([Xuất Excel/PDF])
+  :Khởi tạo định dạng file Excel hoặc PDF;
+  :Tải file báo cáo thống kê về máy tính;
+else ([Chỉ xem])
+  :Kết thúc xem báo cáo trên hệ thống;
+endif
+stop
+@enduml

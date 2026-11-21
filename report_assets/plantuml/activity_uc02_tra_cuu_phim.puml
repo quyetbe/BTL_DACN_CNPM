@@ -1,0 +1,53 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Giao diện Trang chủ / Danh mục phim;
+:Hiển thị danh sách phim đang chiếu và sắp chiếu;
+if (Chọn phương thức tra cứu?) then ([Tìm kiếm theo từ khóa])
+  repeat :Nhập từ khóa tên phim / đạo diễn;
+    :Nhấn nút "Tìm kiếm";
+  backward: Không tìm thấy phim phù hợp;
+  repeat while (Tìm thấy phim?) is ([Không tìm thấy]) not ([Đã tìm thấy])
+  :Hiển thị danh sách phim tìm thấy;
+  :Bấm chọn phim để xem chi tiết;
+  :Hiển thị thông tin phim, Trailer và Suất chiếu;
+else ([Lọc theo tiêu chí])
+  :Chọn bộ lọc thể loại, cụm rạp, ngày chiếu;
+  :Áp dụng bộ lọc phim;
+  :Hiển thị danh sách phim theo bộ lọc;
+  :Bấm chọn phim để xem chi tiết;
+  :Hiển thị thông tin phim, Trailer và Suất chiếu;
+endif
+stop
+@enduml

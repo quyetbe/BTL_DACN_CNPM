@@ -1,0 +1,54 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC13 - LẬP SUẤT CHIẾU VÀ KIỂM TRA XUNG ĐỘT
+
+actor "Quản lý rạp" as Manager
+boundary "Giao diện Lập suất chiếu" as UI_ShowtimeAdmin
+control "Bộ điều khiển Lập suất chiếu" as Ctrl
+entity "Bộ kiểm tra xung đột" as ServiceConflict
+entity "Suất chiếu" as ModelShowtime
+database "Cơ sở dữ liệu" as DB
+
+Manager -> UI_ShowtimeAdmin: 1. Nhập thông tin: Phim, Phòng chiếu, Ngày và Giờ bắt đầu
+activate UI_ShowtimeAdmin
+
+Manager -> UI_ShowtimeAdmin: 2. Nhấn nút "Lập suất chiếu mới"
+UI_ShowtimeAdmin -> Ctrl: 3. Gửi thông tin suất chiếu mới lên máy chủ
+activate Ctrl
+
+Ctrl -> ServiceConflict: 4. Yêu cầu kiểm tra xung đột lịch chiếu trong phòng
+activate ServiceConflict
+
+ServiceConflict -> DB: 5. Truy vấn các suất chiếu hiện có trong phòng vào ngày đó
+activate DB
+DB --> ServiceConflict: Trả về danh sách suất chiếu hiện có trong phòng
+deactivate DB
+
+alt Phát hiện khung giờ bị trùng lặp với suất chiếu khác
+  ServiceConflict --> Ctrl: Cảnh báo phát hiện xung đột lịch chiếu
+  Ctrl --> UI_ShowtimeAdmin: 6a. Báo lỗi: "Phòng chiếu đã có lịch chiếu trong khung giờ này!"
+  UI_ShowtimeAdmin --> Manager: 7a. Hiển thị cảnh báo đỏ và gợi ý các khung giờ còn trống
+else Khung giờ hoàn toàn hợp lệ và không bị trùng
+  ServiceConflict --> Ctrl: Xác nhận khung giờ hoàn toàn khả dụng
+  deactivate ServiceConflict
+  Ctrl -> ModelShowtime: 8. Yêu cầu tạo bản ghi suất chiếu mới
+  activate ModelShowtime
+  ModelShowtime -> DB: 9. Thêm mới suất chiếu vào bảng lịch chiếu trong CSDL
+  activate DB
+  DB --> ModelShowtime: Xác nhận thêm mới suất chiếu thành công
+  deactivate DB
+  ModelShowtime --> Ctrl: Cung cấp đối tượng suất chiếu mới tạo
+  deactivate ModelShowtime
+  Ctrl --> UI_ShowtimeAdmin: 10. Phản hồi thiết lập suất chiếu thành công
+  deactivate Ctrl
+  UI_ShowtimeAdmin --> Manager: 11. Cập nhật suất chiếu lên bảng thời khóa biểu của rạp
+end
+deactivate UI_ShowtimeAdmin
+@enduml

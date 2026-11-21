@@ -1,0 +1,52 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC03 - XEM LỊCH CHIẾU THEO CỤM RẠP VÀ NGÀY
+
+actor "Khách hàng" as Client
+boundary "Giao diện Lịch chiếu" as UI_Showtime
+boundary "Giao diện Chọn ghế" as UI_Seat
+control "Bộ điều khiển Lịch chiếu" as Ctrl
+entity "Suất chiếu" as ModelShowtime
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_Showtime: 1. Chọn cụm rạp và ngày chiếu mong muốn
+activate UI_Showtime
+
+UI_Showtime -> Ctrl: 2. Gửi yêu cầu lấy lịch chiếu theo rạp và ngày
+activate Ctrl
+
+Ctrl -> ModelShowtime: 3. Yêu cầu danh sách suất chiếu của rạp
+activate ModelShowtime
+
+ModelShowtime -> DB: 4. Truy vấn các suất chiếu khả dụng trong ngày
+activate DB
+DB --> ModelShowtime: Trả về danh sách suất chiếu theo phòng
+deactivate DB
+
+ModelShowtime --> Ctrl: Cung cấp dữ liệu các suất chiếu
+deactivate ModelShowtime
+
+Ctrl -> Ctrl: 5. Phân nhóm suất chiếu theo định dạng phòng chiếu
+Ctrl --> UI_Showtime: 6. Hiển thị lưới các khung giờ suất chiếu
+deactivate Ctrl
+
+UI_Showtime --> Client: 7. Hiển thị các nút giờ chiếu (18:45, 20:30, ...)
+deactivate UI_Showtime
+
+Client -> UI_Showtime: 8. Nhấp chọn một khung giờ suất chiếu cụ thể
+activate UI_Showtime
+
+UI_Showtime -> UI_Seat: 9. Chuyển hướng sang màn hình chọn ghế ngồi
+deactivate UI_Showtime
+activate UI_Seat
+
+UI_Seat --> Client: 10. Hiển thị sơ đồ ghế của suất chiếu đã chọn
+deactivate UI_Seat
+@enduml

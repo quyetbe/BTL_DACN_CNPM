@@ -1,0 +1,42 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC11 - QUẢN LÝ DANH MỤC PHIM VÀ POSTER
+
+actor "Quản lý rạp" as Manager
+boundary "Giao diện Quản lý phim" as UI_MovieAdmin
+control "Bộ điều khiển Quản lý phim" as Ctrl
+entity "Phim chiếu" as ModelMovie
+database "Cơ sở dữ liệu" as DB
+
+Manager -> UI_MovieAdmin: 1. Nhập thông tin phim mới và chọn tệp ảnh Poster
+activate UI_MovieAdmin
+
+Manager -> UI_MovieAdmin: 2. Nhấn nút "Lưu phim mới"
+UI_MovieAdmin -> Ctrl: 3. Gửi toàn bộ dữ liệu phim và tệp ảnh lên máy chủ
+activate Ctrl
+
+Ctrl -> Ctrl: 4. Tối ưu hóa kích thước và lưu ảnh Poster vào máy chủ
+Ctrl -> ModelMovie: 5. Yêu cầu tạo mới bản ghi phim trong hệ thống
+activate ModelMovie
+
+ModelMovie -> DB: 6. Thêm bản ghi phim mới vào bảng danh mục phim
+activate DB
+DB --> ModelMovie: Xác nhận thêm mới phim thành công
+deactivate DB
+
+ModelMovie --> Ctrl: Cung cấp đối tượng phim mới tạo
+deactivate ModelMovie
+
+Ctrl --> UI_MovieAdmin: 7. Phản hồi thêm mới phim thành công
+deactivate Ctrl
+
+UI_MovieAdmin --> Manager: 8. Hiển thị bộ phim mới trên danh sách quản lý
+deactivate UI_MovieAdmin
+@enduml

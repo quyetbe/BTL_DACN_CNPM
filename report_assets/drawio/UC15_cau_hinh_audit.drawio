@@ -1,0 +1,58 @@
+<mxfile host="app.diagrams.net" modified="2026-10-29T16:00:00.000Z" agent="Antigravity CineStar" version="24.0.0">
+  <diagram id="UC15" name="Hình 4.17 - UC15: Cấu hình tham số &amp; Audit Log">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" value="PHÂN RÃ USE CASE: UC15 - CẤU HÌNH THAM SỐ RẠP &amp; AUDIT LOGS" style="shape=rect;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=14;fontFamily=Times New Roman;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.5;fillColor=#f8fafc;dashed=1;dashPattern=6 4;" vertex="1" parent="1">
+          <mxGeometry x="240" y="40" width="820" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="act" value="Quản trị viên&#xa;(Admin)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#1e293b;fillColor=#ffffff;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="90" y="270" width="55" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="main1" value="Cấu hình tham số&#xa;vận hành rạp" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#78350f;strokeColor=#d97706;strokeWidth=1.6;fillColor=#fef3c7;" vertex="1" parent="1">
+          <mxGeometry x="280" y="180" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="main2" value="Giám sát nhật ký&#xa;kiểm toán (Audit Log)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#78350f;strokeColor=#d97706;strokeWidth=1.6;fillColor=#fef3c7;" vertex="1" parent="1">
+          <mxGeometry x="280" y="420" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_m1" style="endArrow=none;html=1;strokeColor=#334155;strokeWidth=1.5;" edge="1" parent="1" source="act" target="main1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_m2" style="endArrow=none;html=1;strokeColor=#334155;strokeWidth=1.5;" edge="1" parent="1" source="act" target="main2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sub1" value="Cấu hình thời gian đệm dọn phòng&#xa;(buffer_minutes = 15 phút)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="80" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub2" value="Cấu hình thời gian giữ ghế tạm&#xa;(hold_time = 5 phút)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="180" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub3" value="Cập nhật thông tin rạp chiếu&#xa;(Tên rạp, hotline, địa chỉ)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="280" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub4" value="Xem lịch sử thao tác hệ thống&#xa;(Timestamp, User, Hành động, IP)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub5" value="Lọc và tra cứu nhật ký&#xa;kiểm toán theo thời gian" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="600" y="500" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="inc1" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main1" target="sub1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main1" target="sub2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main1" target="sub3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc4" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main2" target="sub4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#be123c;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#be123c;" edge="1" parent="1" source="sub5" target="main2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

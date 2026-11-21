@@ -1,0 +1,43 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC05 - CHỌN COMBO BẮP NƯỚC (F&B)
+
+actor "Khách hàng" as Client
+boundary "Giao diện Bắp nước" as UI_Combo
+control "Bộ điều khiển Bắp nước" as Ctrl
+entity "Gói Bắp nước" as ModelCombo
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_Combo: 1. Truy cập vào trang lựa chọn bắp nước
+activate UI_Combo
+
+UI_Combo -> Ctrl: 2. Gửi yêu cầu lấy danh mục các gói bắp nước
+activate Ctrl
+
+Ctrl -> ModelCombo: 3. Yêu cầu danh sách các combo đang phục vụ
+activate ModelCombo
+
+ModelCombo -> DB: 4. Truy vấn các gói combo đang hoạt động trong CSDL
+activate DB
+DB --> ModelCombo: Trả về danh mục combo bắp nước kèm giá bán
+deactivate DB
+
+ModelCombo --> Ctrl: Cung cấp danh sách các gói combo
+deactivate ModelCombo
+
+Ctrl --> UI_Combo: 5. Hiển thị danh sách các gói bắp nước trên giao diện
+deactivate Ctrl
+
+Client -> UI_Combo: 6. Tăng số lượng gói combo mong muốn
+UI_Combo -> UI_Combo: 7. Cập nhật tổng tiền đơn hàng gồm vé và combo
+Client -> UI_Combo: 8. Nhấn nút "Tiếp tục thanh toán"
+UI_Combo --> Client: 9. Chuyển sang màn hình xác nhận thông tin thanh toán
+deactivate UI_Combo
+@enduml

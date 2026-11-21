@@ -1,0 +1,47 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Quản trị người dùng & Phân quyền (RBAC);
+:Tải danh sách tài khoản nhân viên và người dùng hệ thống;
+:Chọn một tài khoản nhân viên cần phân quyền;
+repeat :Gán vai trò (Quản trị viên / Thu ngân POS / Soát vé / Kế toán);
+  :Tùy chỉnh danh sách quyền hạn chi tiết (Xem / Thêm / Sửa / Xóa);
+  :Nhấn nút "Cập nhật phân quyền";
+backward: Thiếu quyền quản trị tối cao / Thao tác bị từ chối;
+repeat while (Xác nhận quyền hợp lệ?) is ([Không hợp lệ]) not ([Hợp lệ])
+:Lưu cấu hình phân quyền mới vào CSDL;
+:Ghi nhận hành động vào Nhật ký kiểm toán bảo mật (Audit Log);
+:Thông báo phân quyền thành công và gửi thông báo cho nhân viên;
+stop
+@enduml

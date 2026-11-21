@@ -1,0 +1,52 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Giao diện Đăng nhập / Đăng ký;
+if (Chọn hình thức xác thực?) then ([Chưa có tài khoản])
+  :Chuyển sang form Đăng ký thành viên;
+  repeat :Nhập họ tên, email, mật khẩu, SĐT;
+    :Nhấn nút "Đăng ký";
+  backward: Báo lỗi / Email đã tồn tại;
+  repeat while (Thông tin hợp lệ?) is ([Không hợp lệ]) not ([Hợp lệ])
+  :Tạo tài khoản và kích hoạt phiên làm việc;
+else ([Đã có tài khoản])
+  :Mở form Đăng nhập tài khoản;
+  repeat :Nhập email và mật khẩu;
+    :Nhấn nút "Đăng nhập";
+  backward: Sai mật khẩu / Bị khóa;
+  repeat while (Xác thực tài khoản?) is ([Thất bại]) not ([Thành công])
+  :Cấp mã JWT và khởi tạo phiên làm việc;
+endif
+stop
+@enduml

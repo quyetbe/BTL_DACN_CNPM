@@ -1,0 +1,99 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName "Arial"
+skinparam defaultFontSize 12
+skinparam linetype ortho
+skinparam roundCorner 0
+skinparam dpi 300
+
+title BIỂU ĐỒ TUẦN TỰ: QUY TRÌNH ĐẶT VÉ VÀ THANH TOÁN (KHÁCH HÀNG)
+
+actor "Khách hàng" as Client
+boundary "Giao diện Chọn ghế" as UI_Seat
+boundary "Giao diện Thanh toán" as UI_Checkout
+control "BookingController" as Ctrl
+entity "SeatLock" as ModelLock
+entity "Booking" as ModelBooking
+entity "Ticket" as ModelTicket
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_Seat: 1. Chọn ghế [D07, D08] và bấm Tiếp tục
+activate UI_Seat
+
+UI_Seat -> Ctrl: 2. POST /booking/lock-seats (showtime_id, seat_ids)
+activate Ctrl
+
+Ctrl -> ModelLock: 3. lockSeats(showtime_id, seat_ids, sessionId, 5 min)
+activate ModelLock
+
+ModelLock -> DB: 4. Kiểm tra vé đã bán (Tickets) và ghế đang khóa (SeatLocks)
+activate DB
+DB --> ModelLock: Kết quả kiểm tra
+deactivate DB
+
+alt Ghế đã bị giữ hoặc đã bán
+    ModelLock --> Ctrl: {success: false, message: "Ghế đang bận"}
+    Ctrl --> UI_Seat: Trả về lỗi xung đột ghế
+    UI_Seat --> Client: Hiển thị cảnh báo ghế đã được đặt
+else Ghế còn trống hợp lệ
+    ModelLock -> DB: 5. INSERT INTO seat_locks (expires_at = now + 5m)
+    activate DB
+    DB --> ModelLock: Thành công
+    deactivate DB
+    ModelLock --> Ctrl: {success: true, expiresAt}
+    deactivate ModelLock
+    Ctrl --> UI_Seat: Phản hồi khóa ghế thành công (200 OK)
+    deactivate Ctrl
+    UI_Seat -> UI_Checkout: 6. Chuyển hướng sang màn hình thanh toán
+    deactivate UI_Seat
+    activate UI_Checkout
+    UI_Checkout --> Client: Hiển thị đếm ngược 5:00 và form thanh toán
+end
+
+Client -> UI_Checkout: 7. Chọn phương thức thanh toán và ấn Xác nhận thanh toán
+UI_Checkout -> Ctrl: 8. POST /booking/checkout (thông tin khách, booking data)
+activate Ctrl
+
+Ctrl -> ModelLock: 9. checkValidLock(sessionId, showtime_id)
+activate ModelLock
+ModelLock -> DB: Truy vấn seat_locks (expires_at > NOW())
+activate DB
+DB --> ModelLock: Khóa còn hiệu lực
+deactivate DB
+ModelLock --> Ctrl: Hợp lệ
+deactivate ModelLock
+
+Ctrl -> ModelBooking: 10. createBooking(user_id, showtime_id, amount,...)
+activate ModelBooking
+ModelBooking -> DB: INSERT INTO bookings
+activate DB
+DB --> ModelBooking: booking_id mới
+deactivate DB
+ModelBooking --> Ctrl: booking_id
+deactivate ModelBooking
+
+Ctrl -> ModelTicket: 11. createTickets(booking_id, seats, qr_data)
+activate ModelTicket
+ModelTicket -> DB: INSERT INTO tickets (status='unused', qr_data)
+activate DB
+DB --> ModelTicket: tickets created
+deactivate DB
+ModelTicket --> Ctrl: Danh sách vé điện tử
+deactivate ModelTicket
+
+Ctrl -> ModelLock: 12. releaseSession(sessionId)
+activate ModelLock
+ModelLock -> DB: DELETE FROM seat_locks
+activate DB
+DB --> ModelLock: Đã giải phóng khóa
+deactivate DB
+ModelLock --> Ctrl: OK
+deactivate ModelLock
+
+Ctrl --> UI_Checkout: 13. Phản hồi đặt vé thành công (booking_code, QR codes)
+deactivate Ctrl
+UI_Checkout --> Client: 14. Hiển thị vé điện tử kèm mã QR Code
+deactivate UI_Checkout
+
+@enduml

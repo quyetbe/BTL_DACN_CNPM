@@ -1,0 +1,43 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC09 - QUÉT MÃ QR SOÁT VÉ QUA CAMERA
+
+actor "Nhân viên soát vé" as Staff
+boundary "Giao diện Soát vé" as UI_Scan
+control "Bộ điều khiển Soát vé" as Ctrl
+entity "Vé xem phim" as ModelTicket
+database "Cơ sở dữ liệu" as DB
+
+Staff -> UI_Scan: 1. Mở màn hình soát vé và kích hoạt camera thiết bị
+activate UI_Scan
+
+Staff -> UI_Scan: 2. Hướng camera về phía mã QR trên điện thoại của khách
+UI_Scan -> UI_Scan: 3. Nhận diện hình ảnh và giải mã chuỗi mã vạch
+UI_Scan -> Ctrl: 4. Gửi chuỗi mã vé thu được lên máy chủ kiểm tra
+activate Ctrl
+
+Ctrl -> Ctrl: 5. Kiểm tra chữ ký số bảo mật của mã vé điện tử
+Ctrl -> ModelTicket: 6. Yêu cầu tìm kiếm thông tin vé theo mã vé
+activate ModelTicket
+
+ModelTicket -> DB: 7. Truy vấn thông tin chi tiết vé xem phim từ CSDL
+activate DB
+DB --> ModelTicket: Trả về bản ghi thông tin vé xem phim
+deactivate DB
+
+ModelTicket --> Ctrl: Cung cấp đối tượng vé xem phim
+deactivate ModelTicket
+
+Ctrl --> UI_Scan: 8. Trả về thông tin chi tiết: Phim, Phòng, Ghế, Trạng thái
+deactivate Ctrl
+
+UI_Scan --> Staff: 9. Hiển thị thông tin vé lên màn hình để nhân viên kiểm tra
+deactivate UI_Scan
+@enduml

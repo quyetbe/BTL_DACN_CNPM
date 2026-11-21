@@ -1,0 +1,45 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Lập lịch chiếu phim;
+:Chọn cụm rạp, phòng chiếu và ngày chiếu cần lập lịch;
+repeat :Chọn phim và nhập giờ bắt đầu suất chiếu;
+  :Hệ thống tự động tính giờ kết thúc (+15 phút dọn phòng);
+  :Hệ thống quét kiểm tra trùng lặp lịch phòng chiếu;
+backward: Xung đột khung giờ với suất chiếu khác trong cùng phòng;
+repeat while (Kiểm tra xung đột?) is ([Bị trùng lịch]) not ([Không xung đột])
+:Xác nhận và lưu suất chiếu mới vào CSDL;
+:Đồng bộ lịch chiếu mới lên Website, App và hệ thống POS;
+stop
+@enduml

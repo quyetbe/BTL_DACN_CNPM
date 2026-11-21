@@ -1,0 +1,48 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Giám sát đối soát vé của Quản lý;
+:Tải nhật ký quét vé thời gian thực của các phòng chiếu;
+:Hệ thống chạy thuật toán phát hiện gian lận;
+if (Phát hiện dấu hiệu bất thường?) then ([Có gian lận])
+  :Hiển thị cảnh báo vé giả mạo hoặc vé quét trùng lặp;
+  :Trích xuất hình ảnh camera tại cửa soát vé tương ứng;
+  :Lập biên bản sự vụ và khóa quyền truy cập của vé;
+  :Thông báo cho bộ phận an ninh xử lý;
+else ([Bình thường])
+  :Ghi nhận đối soát khớp 100% dữ liệu vé và số người;
+  :Lưu báo cáo đối soát ca trực vào nhật ký hệ thống;
+endif
+stop
+@enduml

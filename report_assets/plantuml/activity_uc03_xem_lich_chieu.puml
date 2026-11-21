@@ -1,0 +1,44 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Giao diện Lịch chiếu theo cụm rạp;
+:Chọn cụm rạp và ngày chiếu mong muốn;
+repeat :Tải danh sách suất chiếu từ hệ thống;
+backward: Không có suất chiếu trong ngày / Chọn ngày khác;
+repeat while (Có suất chiếu trong ngày?) is ([Không có]) not ([Có suất chiếu])
+:Hiển thị lưới khung giờ suất chiếu theo phòng (2D, 3D, IMAX);
+:Khách hàng click chọn khung giờ suất chiếu cụ thể;
+:Chuyển hướng sang màn hình Chọn ghế và Đặt vé;
+stop
+@enduml

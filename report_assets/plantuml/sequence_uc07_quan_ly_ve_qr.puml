@@ -1,0 +1,48 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC07 - QUẢN LÝ VÉ CÁ NHÂN VÀ XUẤT TRÌNH QR
+
+actor "Khách hàng" as Client
+boundary "Giao diện Vé cá nhân" as UI_MyTickets
+control "Bộ điều khiển Vé" as Ctrl
+entity "Vé xem phim" as ModelTicket
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_MyTickets: 1. Truy cập vào trang quản lý vé cá nhân
+activate UI_MyTickets
+
+UI_MyTickets -> Ctrl: 2. Gửi yêu cầu lấy danh sách vé của người dùng
+activate Ctrl
+
+Ctrl -> ModelTicket: 3. Yêu cầu danh sách vé theo định danh người dùng
+activate ModelTicket
+
+ModelTicket -> DB: 4. Truy vấn các đơn đặt vé trong lịch sử cá nhân
+activate DB
+DB --> ModelTicket: Trả về danh sách vé đã đặt và trạng thái vé
+deactivate DB
+
+ModelTicket --> Ctrl: Cung cấp danh sách các vé xem phim
+deactivate ModelTicket
+
+Ctrl --> UI_MyTickets: 5. Hiển thị danh sách vé đã mua trên giao diện
+deactivate Ctrl
+
+Client -> UI_MyTickets: 6. Bấm chọn một vé cụ thể để xem chi tiết
+UI_MyTickets -> Ctrl: 7. Yêu cầu mã QR Code của vé xem phim đã chọn
+activate Ctrl
+
+Ctrl -> Ctrl: 8. Tạo hình ảnh mã QR Code chứa thông tin bảo mật của vé
+Ctrl --> UI_MyTickets: 9. Trả về chi tiết vé xem phim và hình ảnh mã QR
+deactivate Ctrl
+
+UI_MyTickets --> Client: 10. Hiển thị vé điện tử và mã QR để vào phòng chiếu
+deactivate UI_MyTickets
+@enduml

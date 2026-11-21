@@ -1,0 +1,63 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC02 - TRA CỨU PHIM VÀ XEM CHI TIẾT
+
+actor "Khách hàng" as Client
+boundary "Giao diện Danh mục phim" as UI_Movie
+control "Bộ điều khiển Phim" as Ctrl
+entity "Phim chiếu" as ModelMovie
+database "Cơ sở dữ liệu" as DB
+
+Client -> UI_Movie: 1. Nhập từ khóa tìm kiếm hoặc chọn thể loại phim
+activate UI_Movie
+
+UI_Movie -> Ctrl: 2. Gửi yêu cầu tìm kiếm phim theo điều kiện
+activate Ctrl
+
+Ctrl -> ModelMovie: 3. Yêu cầu lọc danh sách phim phù hợp
+activate ModelMovie
+
+ModelMovie -> DB: 4. Truy vấn các bộ phim đang chiếu thỏa mãn điều kiện
+activate DB
+DB --> ModelMovie: Trả về danh sách các bộ phim tìm thấy
+deactivate DB
+
+ModelMovie --> Ctrl: Cung cấp danh sách các bộ phim
+deactivate ModelMovie
+
+Ctrl --> UI_Movie: 5. Hiển thị danh sách các thẻ phim trên giao diện
+deactivate Ctrl
+
+UI_Movie --> Client: 6. Hiển thị danh sách phim kèm hình ảnh Poster
+deactivate UI_Movie
+
+Client -> UI_Movie: 7. Bấm chọn một bộ phim cụ thể để xem chi tiết
+activate UI_Movie
+
+UI_Movie -> Ctrl: 8. Gửi yêu cầu lấy thông tin chi tiết của phim
+activate Ctrl
+
+Ctrl -> ModelMovie: 9. Yêu cầu chi tiết phim và lịch chiếu đi kèm
+activate ModelMovie
+
+ModelMovie -> DB: 10. Truy vấn thông tin chi tiết và danh sách suất chiếu
+activate DB
+DB --> ModelMovie: Trả về đầy đủ thông tin phim và suất chiếu
+deactivate DB
+
+ModelMovie --> Ctrl: Cung cấp dữ liệu chi tiết bộ phim
+deactivate ModelMovie
+
+Ctrl --> UI_Movie: 11. Trình bày nội dung chi tiết và danh sách suất chiếu
+deactivate Ctrl
+
+UI_Movie --> Client: 12. Hiển thị thông tin phim, trailer và các giờ chiếu
+deactivate UI_Movie
+@enduml

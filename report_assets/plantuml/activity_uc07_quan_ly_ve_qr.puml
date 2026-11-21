@@ -1,0 +1,51 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Mở giao diện Lịch sử đặt vé cá nhân;
+:Hiển thị danh sách vé đã mua của tài khoản;
+:Khách hàng chọn một đơn vé trong danh sách;
+if (Chọn tác vụ xử lý vé?) then ([Xem và Tải vé QR])
+  :Hiển thị chi tiết vé, mã ghế và hình ảnh QR Code;
+  :Nhấn nút "Tải vé QR / Lưu hình ảnh";
+  :Lưu file ảnh vé về thiết bị cá nhân;
+else ([Hủy đơn vé])
+  :Kiểm tra điều kiện thời gian hủy (trước giờ chiếu tối thiểu 60p);
+  repeat :Chọn lý do hủy vé và xác nhận hủy;
+  backward: Vi phạm thời gian hủy vé / Không thể hủy;
+  repeat while (Hợp lệ hủy vé?) is ([Không hợp lệ]) not ([Hợp lệ])
+  :Đổi trạng thái vé sang "Đã hủy" và nhả ghế về trống;
+  :Gửi yêu cầu hoàn tiền tự động theo quy định;
+endif
+stop
+@enduml

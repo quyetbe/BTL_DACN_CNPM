@@ -1,0 +1,58 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC12 - QUẢN LÝ PHÒNG CHIẾU VÀ GHẾ BẢO TRÌ
+
+actor "Quản lý rạp" as Manager
+boundary "Giao diện Quản lý phòng" as UI_RoomAdmin
+control "Bộ điều khiển Phòng chiếu" as Ctrl
+entity "Ghế ngồi" as ModelSeat
+database "Cơ sở dữ liệu" as DB
+
+Manager -> UI_RoomAdmin: 1. Chọn phòng chiếu cần cấu hình lại ghế
+activate UI_RoomAdmin
+
+UI_RoomAdmin -> Ctrl: 2. Gửi yêu cầu lấy sơ đồ ghế hiện tại của phòng
+activate Ctrl
+
+Ctrl -> ModelSeat: 3. Yêu cầu danh sách các ghế của phòng chiếu
+activate ModelSeat
+
+ModelSeat -> DB: 4. Truy vấn thông tin các ghế ngồi trong phòng từ CSDL
+activate DB
+DB --> ModelSeat: Trả về danh sách ghế và trạng thái của từng ghế
+deactivate DB
+
+ModelSeat --> Ctrl: Cung cấp dữ liệu sơ đồ ghế của phòng
+deactivate ModelSeat
+
+Ctrl --> UI_RoomAdmin: 5. Hiển thị ma trận ghế của phòng chiếu
+deactivate Ctrl
+
+Manager -> UI_RoomAdmin: 6. Chọn ghế hỏng và bấm nút "Đánh dấu bảo trì"
+UI_RoomAdmin -> Ctrl: 7. Gửi yêu cầu cập nhật trạng thái ghế sang bảo trì
+activate Ctrl
+
+Ctrl -> ModelSeat: 8. Yêu cầu đổi trạng thái ghế được chọn
+activate ModelSeat
+
+ModelSeat -> DB: 9. Cập nhật trạng thái bảo trì cho ghế trong CSDL
+activate DB
+DB --> ModelSeat: Xác nhận cập nhật thành công
+deactivate DB
+
+ModelSeat --> Ctrl: Thông báo hoàn tất cập nhật ghế
+deactivate ModelSeat
+
+Ctrl --> UI_RoomAdmin: 10. Phản hồi cập nhật thành công
+deactivate Ctrl
+
+UI_RoomAdmin --> Manager: 11. Đổi màu hiển thị của ghế sang trạng thái bảo trì
+deactivate UI_RoomAdmin
+@enduml

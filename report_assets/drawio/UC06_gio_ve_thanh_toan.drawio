@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net" modified="2026-10-29T16:00:00.000Z" agent="Antigravity CineStar" version="24.0.0">
+  <diagram id="UC06" name="Hình 4.8 - UC06: Giỏ vé, Combo &amp; Thanh toán">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1280" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="box" value="PHÂN RÃ USE CASE: UC06 - QUẢN LÝ GIỎ VÉ, CHỌN COMBO F&amp;B &amp; THANH TOÁN" style="shape=rect;whiteSpace=wrap;html=1;verticalAlign=top;fontStyle=1;fontSize=14;fontFamily=Times New Roman;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.5;fillColor=#f8fafc;dashed=1;dashPattern=6 4;" vertex="1" parent="1">
+          <mxGeometry x="230" y="40" width="860" height="580" as="geometry" />
+        </mxCell>
+        <mxCell id="act" value="Khách hàng" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#1e293b;fillColor=#ffffff;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="80" y="270" width="55" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="act_pay" value="Cổng thanh toán&#xa;(VNPAY / MoMo)" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;strokeColor=#1e293b;fillColor=#ffffff;strokeWidth=1.5;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="1130" y="270" width="60" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="main1" value="Quản lý giỏ vé&#xa;&amp; Chọn combo F&amp;B" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#78350f;strokeColor=#d97706;strokeWidth=1.6;fillColor=#fef3c7;" vertex="1" parent="1">
+          <mxGeometry x="270" y="180" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="main2" value="Thanh toán đơn hàng&#xa;&amp; Nhận vé điện tử" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontStyle=1;fontColor=#78350f;strokeColor=#d97706;strokeWidth=1.6;fillColor=#fef3c7;" vertex="1" parent="1">
+          <mxGeometry x="270" y="420" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_m1" style="endArrow=none;html=1;strokeColor=#334155;strokeWidth=1.5;" edge="1" parent="1" source="act" target="main1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_a_m2" style="endArrow=none;html=1;strokeColor=#334155;strokeWidth=1.5;" edge="1" parent="1" source="act" target="main2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sub1" value="Chọn số lượng combo&#xa;(Bắp rang, nước ngọt)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="580" y="80" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub2" value="Tính tổng tiền đơn hàng&#xa;(Tiền vé + Tiền combo)" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="580" y="180" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub3" value="Chuyển hướng cổng VNPAY/MoMo&#xa;&amp; Nhận IPN Callback" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="580" y="300" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub4" value="Sinh mã QR Code bảo mật&#xa;cho từng vé điện tử" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="580" y="410" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="sub5" value="Quản lý lịch sử vé&#xa;trong mục 'Vé của tôi'" style="ellipse;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=12;fontColor=#1e293b;strokeColor=#475569;strokeWidth=1.2;fillColor=#ffffff;" vertex="1" parent="1">
+          <mxGeometry x="580" y="510" width="240" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="ext1" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#be123c;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#be123c;" edge="1" parent="1" source="sub1" target="main1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc2" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main1" target="sub2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc3" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main2" target="sub3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inc4" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#0284c7;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#0369a1;" edge="1" parent="1" source="main2" target="sub4">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ext5" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="html=1;verticalAlign=bottom;labelBackgroundColor=#ffffff;endArrow=open;dashed=1;endSize=8;strokeColor=#be123c;strokeWidth=1.2;fontFamily=Times New Roman;fontSize=11;fontStyle=2;fontColor=#be123c;" edge="1" parent="1" source="sub5" target="main2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_pay_sub3" style="endArrow=none;html=1;strokeColor=#334155;strokeWidth=1.5;" edge="1" parent="1" source="act_pay" target="sub3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

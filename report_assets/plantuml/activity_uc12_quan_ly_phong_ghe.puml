@@ -1,0 +1,52 @@
+@startuml
+!pragma max_image_size 8192
+skinparam nodesep 80
+skinparam ranksep 45
+skinparam conditionStyle inside
+skinparam roundCorner 12
+skinparam linetype ortho
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam dpi 200
+
+skinparam activity {
+  StartColor #000000
+  EndColor #000000
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+}
+skinparam diamond {
+  BackgroundColor #FCF0CC
+  BorderColor #B85450
+  BorderThickness 1.2
+  FontColor #000000
+  FontSize 10
+}
+skinparam arrow {
+  Color #333333
+  FontColor #000000
+  FontSize 10
+}
+
+start
+:Màn hình Cấu hình Phòng chiếu của Quản trị viên;
+:Chọn cụm rạp và phòng chiếu cần quản lý;
+if (Chọn thao tác cấu hình?) then ([Tạo phòng chiếu mới])
+  repeat :Nhập tên phòng, loại máy chiếu (2D/3D/IMAX), số hàng ghế;
+    :Thiết lập ma trận ghế (Thường, VIP, Đôi);
+  backward: Tên phòng trùng lặp / Số ghế không hợp lệ;
+  repeat while (Cấu hình hợp lệ?) is ([Không hợp lệ]) not ([Hợp lệ])
+  :Khởi tạo phòng và ma trận ghế vào CSDL;
+  :Hiển thị sơ đồ phòng chiếu đã được cập nhật;
+else ([Bảo trì / Khóa ghế hỏng])
+  :Mở sơ đồ ghế hiện tại của phòng chiếu;
+  :Click chọn các vị trí ghế cần bảo trì;
+  :Đổi trạng thái ghế sang "Tạm ngưng phục vụ";
+  :Lưu trạng thái ghế vào CSDL;
+  :Hiển thị sơ đồ phòng chiếu đã được cập nhật;
+endif
+stop
+@enduml

@@ -1,0 +1,52 @@
+@startuml
+!pragma max_image_size 8192
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam maxMessageSize 180
+skinparam dpi 200
+
+title BIỂU ĐỒ TUẦN TỰ: UC10 - ĐỐI SOÁT VÉ VÀ CẢNH BÁO GIAN LẬN
+
+actor "Nhân viên soát vé" as Staff
+boundary "Giao diện Soát vé" as UI_Scan
+control "Bộ điều khiển Soát vé" as Ctrl
+entity "Vé xem phim" as ModelTicket
+database "Cơ sở dữ liệu" as DB
+
+Staff -> UI_Scan: 1. Nhấn nút xác nhận cho khách vào phòng chiếu
+activate UI_Scan
+
+UI_Scan -> Ctrl: 2. Gửi yêu cầu đối soát và đánh dấu sử dụng vé
+activate Ctrl
+
+Ctrl -> ModelTicket: 3. Yêu cầu kiểm tra trạng thái vé với phòng và giờ hiện tại
+activate ModelTicket
+
+ModelTicket -> DB: 4. Truy vấn trạng thái sử dụng của vé trong CSDL
+activate DB
+DB --> ModelTicket: Trả về trạng thái vé đã dùng hay chưa
+deactivate DB
+
+alt Vé đã bị sử dụng trước đó (Gian lận vé)
+  ModelTicket -> DB: 5a. Ghi nhận vi phạm gian lận vé vào nhật ký hệ thống
+  activate DB
+  DB --> ModelTicket: Xác nhận ghi nhật ký gian lận thành công
+  deactivate DB
+  ModelTicket --> Ctrl: Thông báo phát hiện gian lận vé
+  Ctrl --> UI_Scan: 6a. Phát âm thanh cảnh báo đỏ: "Vé đã được sử dụng trước đó!"
+  UI_Scan --> Staff: 7a. Hiển thị cảnh báo đỏ và hướng dẫn giữ khách để kiểm tra
+else Vé hợp lệ và đúng phòng, đúng suất chiếu
+  ModelTicket -> DB: 5b. Đánh dấu vé đã sử dụng và lưu thời điểm soát vé
+  activate DB
+  DB --> ModelTicket: Xác nhận cập nhật trạng thái thành công
+  deactivate DB
+  ModelTicket --> Ctrl: Thông báo vé hợp lệ vào phòng
+  deactivate ModelTicket
+  Ctrl --> UI_Scan: 6b. Bật tín hiệu xanh: "Soát vé thành công - Mời vào phòng"
+  UI_Scan --> Staff: 7b. Đèn xanh hiển thị và xác nhận khách vào phòng xem phim
+end
+deactivate Ctrl
+deactivate UI_Scan
+@enduml

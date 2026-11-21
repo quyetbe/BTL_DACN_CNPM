@@ -1,0 +1,210 @@
+<mxfile host="app.diagrams.net" modified="2026-11-03T12:00:00.000Z" agent="Antigravity CineStar" version="24.0.0">
+  <diagram id="Seq_LapSuatChieu" name="Biểu đồ tuần tự: Lập suất chiếu và Chống xung đột">
+    <mxGraphModel dx="1422" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" value="BIỂU ĐỒ TUẦN TỰ: LẬP SUẤT CHIẾU MỚI VÀ CHỐNG XUNG ĐỘT (MANAGER)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontStyle=1;fontSize=14;fontFamily=Times New Roman;fontColor=#0f172a;" vertex="1" parent="1">
+          <mxGeometry x="350" y="20" width="700" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_mgr" value="Quản lý rạp&#xa;(Manager)" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#ffffff;strokeColor=#334155;" vertex="1" parent="1">
+          <mxGeometry x="100" y="70" width="100" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_ui" value="&amp;laquo;boundary&amp;raquo;&#xa;GiaoDienXepLich" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="320" y="70" width="130" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_ctrl" value="&amp;laquo;control&amp;raquo;&#xa;ManagerController" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="580" y="70" width="130" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_conflict" value="&amp;laquo;control&amp;raquo;&#xa;ConflictDetector" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="840" y="70" width="130" height="880" as="geometry" />
+        </mxCell>
+
+        <mxCell id="ll_showtime" value="&amp;laquo;entity&amp;raquo;&#xa;Showtime &amp;amp; CSDL" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;html=1;container=1;collapsible=0;recursiveResize=0;outlineConnect=0;fontFamily=Times New Roman;fontStyle=1;fillColor=#fffbeb;strokeColor=#d97706;" vertex="1" parent="1">
+          <mxGeometry x="1100" y="70" width="130" height="880" as="geometry" />
+        </mxCell>
+
+        <!-- Messages 1 -> 4 -->
+        <mxCell id="m1" value="1. Mở màn hình Lập lịch suất chiếu" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="150" as="sourcePoint" />
+            <mxPoint x="385" y="150" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m2" value="2. GET /manager/showtimes/new" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="180" as="sourcePoint" />
+            <mxPoint x="645" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m3" value="3. Hiển thị form xếp lịch phòng chiếu &amp;amp; danh mục phim" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#475569;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="210" as="sourcePoint" />
+            <mxPoint x="385" y="210" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m4" value="4. Hiển thị giao diện xếp lịch phòng chiếu" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#475569;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="235" as="sourcePoint" />
+            <mxPoint x="150" y="235" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Messages 5 -> 10 -->
+        <mxCell id="m5" value="5. Chọn Phim, Phòng, Ngày, Giờ bắt đầu, bấm 'Kiểm tra &amp;amp; Lưu'" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="150" y="280" as="sourcePoint" />
+            <mxPoint x="385" y="280" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m6" value="6. POST /manager/showtimes/check-and-create" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="310" as="sourcePoint" />
+            <mxPoint x="645" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m7" value="7. Tự tính T_end = T_start + duration + 15p vệ sinh" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="335" as="sourcePoint" />
+            <mxPoint x="645" y="355" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="675" y="335" />
+              <mxPoint x="675" y="355" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m8" value="8. checkConflict(roomId, startTime, endTime, 15 phút)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="380" as="sourcePoint" />
+            <mxPoint x="905" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m9" value="9. Truy vấn suất chiếu cùng ngày: SELECT * FROM showtimes" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="410" as="sourcePoint" />
+            <mxPoint x="1165" y="410" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m10" value="10. Trả về danh sách suất chiếu hiện có trong phòng" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#475569;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1165" y="440" as="sourcePoint" />
+            <mxPoint x="905" y="440" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- ALT FRAME: KẾT QUẢ XUNG ĐỘT -->
+        <mxCell id="alt" value="alt" style="shape=umlFrame;whiteSpace=wrap;html=1;width=50;height=25;boundedLbl=1;verticalAlign=top;align=left;spacingLeft=5;fillColor=#fafafa;strokeColor=#64748b;fontFamily=Times New Roman;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="70" y="470" width="1180" height="430" as="geometry" />
+        </mxCell>
+
+        <mxCell id="guard_fail" value="[Luồng phụ / Thất bại: Phát hiện xung đột lịch chiếu phòng (hasConflict = true)]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#be123c;" vertex="1" parent="alt">
+          <mxGeometry x="60" y="5" width="480" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m12a" value="12a. Trả về {hasConflict: true, conflictInfo, message}" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="510" as="sourcePoint" />
+            <mxPoint x="645" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m13a" value="13a. Phản hồi cảnh báo xung đột phòng chiếu (400 Bad Request)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="540" as="sourcePoint" />
+            <mxPoint x="385" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14a" value="14a. CẢNH BÁO ĐỎ: 'Xung đột phòng chiếu với phim [X] (19:00 - 21:15)!'" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#be123c;fontColor=#be123c;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="570" as="sourcePoint" />
+            <mxPoint x="150" y="570" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15a" value="15a. Khóa nút Lưu, gợi ý khung giờ an toàn tiếp theo: sau 21:30" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="600" as="sourcePoint" />
+            <mxPoint x="385" y="620" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="415" y="600" />
+              <mxPoint x="415" y="620" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Divider line -->
+        <mxCell id="div" style="endArrow=none;dashed=1;html=1;strokeWidth=1.2;strokeColor=#94a3b8;" edge="1" parent="alt">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="180" as="sourcePoint" />
+            <mxPoint x="1180" y="180" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="guard_succ" value="[else: Luồng chính / Thành công: Không có xung đột (Khung giờ an toàn hợp lệ)]" style="text;html=1;align=left;verticalAlign=middle;fontFamily=Times New Roman;fontSize=11;fontStyle=1;fontColor=#15803d;" vertex="1" parent="alt">
+          <mxGeometry x="10" y="185" width="480" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="m12b" value="12b. Trả về {hasConflict: false, message: 'Phòng trống hợp lệ'}" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="905" y="685" as="sourcePoint" />
+            <mxPoint x="645" y="685" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m13b" value="13b. createShowtime(movieId, roomId, start, end, price)" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="720" as="sourcePoint" />
+            <mxPoint x="1165" y="720" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m14b" value="14b. INSERT INTO showtimes thành công (showtime_id mới)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1165" y="755" as="sourcePoint" />
+            <mxPoint x="645" y="755" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m15b" value="15b. Ghi nhật ký kiểm toán Audit Logs hệ thống" style="html=1;verticalAlign=bottom;endArrow=block;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#0f172a;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="785" as="sourcePoint" />
+            <mxPoint x="645" y="805" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="675" y="785" />
+              <mxPoint x="675" y="805" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m16b" value="16b. Phản hồi thông báo thêm suất chiếu thành công (200 OK)" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="645" y="835" as="sourcePoint" />
+            <mxPoint x="385" y="835" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="m17b" value="17b. THÔNG BÁO XANH: 'Thêm suất chiếu thành công!', cập nhật bảng lịch" style="html=1;verticalAlign=bottom;endArrow=open;dashed=1;endSize=8;rounded=0;fontFamily=Times New Roman;fontSize=11;strokeColor=#15803d;fontColor=#15803d;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="385" y="865" as="sourcePoint" />
+            <mxPoint x="150" y="865" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
