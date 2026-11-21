@@ -29,7 +29,8 @@ uploads/*
 .idea/
 *.iml
 
-# Python caches & Virtual environments
+# Python caches, scripts & Virtual environments
+*.py
 __pycache__/
 *.py[cod]
 *$py.class
