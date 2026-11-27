@@ -148,6 +148,42 @@
                     <h5 class="mb-0 text-dark fw-bold fs-6 fs-md-5 text-truncate" style="max-width: 340px;"><%= typeof title !== 'undefined' ? title : 'Quản Lý Rạp Chiếu Phim' %></h5>
                 </div>
                 <div class="d-flex align-items-center gap-2 gap-md-3">
+                    <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role_name === 'admin' || currentUser.role_name === 'manager')) { %>
+                        <% const approvalUrl = currentUser.role_name === 'manager' ? '/manager/approvals' : '/admin/approvals'; %>
+                        <% const pCount = typeof pendingBookingsCount !== 'undefined' ? Number(pendingBookingsCount) : 0; %>
+                        <!-- Chuông Thông Báo Đơn Vé Cần Duyệt (Real-time cho Admin & Manager) -->
+                        <div class="dropdown">
+                            <button type="button" id="topbarNotifBtn" class="btn btn-light border position-relative rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px;" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false" title="Thông báo đơn vé cần duyệt" onclick="window.loadPendingNotifications && window.loadPendingNotifications()">
+                                <i id="topbarNotifBellIcon" class="fa-solid fa-bell text-dark"></i>
+                                <span id="topbarNotifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger text-white <%= pCount > 0 ? '' : 'd-none' %>" style="font-size: 0.68rem;">
+                                    <%= pCount %>
+                                </span>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-end p-0 mt-2 notif-dropdown-menu overflow-hidden">
+                                <div class="d-flex justify-content-between align-items-center px-3 py-2 bg-light border-bottom">
+                                    <div class="fw-bold text-dark small d-flex align-items-center gap-2">
+                                        <i class="fa-solid fa-bell text-danger"></i>
+                                        <span>Vé Chờ Duyệt Thanh Toán</span>
+                                        <span id="notifDropdownCount" class="badge bg-warning text-dark rounded-pill"><%= pCount %></span>
+                                    </div>
+                                    <button type="button" id="btnToggleNotifSound" class="btn btn-sm btn-link text-secondary p-0 text-decoration-none" title="Bật / tắt âm thanh thông báo" onclick="window.toggleNotifSound && window.toggleNotifSound()">
+                                        <i class="fa-solid fa-volume-high"></i>
+                                    </button>
+                                </div>
+                                <div id="notifDropdownList" style="max-height: 320px; overflow-y: auto;">
+                                    <div class="text-center text-muted small py-4">
+                                        <i class="fa-solid fa-spinner fa-spin me-1"></i> Đang tải danh sách...
+                                    </div>
+                                </div>
+                                <div class="p-2 bg-light border-top text-center">
+                                    <a href="<%= approvalUrl %>" class="btn btn-danger text-white btn-sm w-100 rounded-pill fw-bold">
+                                        <i class="fa-solid fa-clipboard-check me-1"></i> Mở Trang Duyệt Đơn
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+
                     <a href="http://localhost:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>" target="_blank" class="btn btn-outline-success btn-sm rounded-pill fw-semibold d-none d-md-inline-flex align-items-center gap-1">
                         <i class="fa-solid fa-window-restore"></i>
                         <span>Mở Trang Khách Hàng</span>
@@ -168,6 +204,23 @@
                     if (bd) bd.classList.toggle('show');
                 }
             </script>
+
+            <!-- Banner thông báo nhanh khi có vé chờ duyệt (hiện trên mọi trang trừ trang duyệt đơn) -->
+            <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role_name === 'admin' || currentUser.role_name === 'manager') && !(typeof currentPath !== 'undefined' && (currentPath.includes('/admin/approvals') || currentPath.includes('/manager/approvals')))) { %>
+                <% const pCountBanner = typeof pendingBookingsCount !== 'undefined' ? Number(pendingBookingsCount) : 0; %>
+                <% const bannerApprovalUrl = currentUser.role_name === 'manager' ? '/manager/approvals' : '/admin/approvals'; %>
+                <div id="globalPendingBanner" class="px-4 pt-3 <%= pCountBanner > 0 ? '' : 'd-none' %>">
+                    <div class="alert alert-warning border-warning d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 px-3 mb-0 rounded-3 shadow-sm">
+                        <div class="small text-dark fw-semibold d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-bell text-danger"></i>
+                            <span>Hiện có <strong id="globalPendingBannerCount" class="text-danger"><%= pCountBanner %></strong> đơn vé đang chờ xác nhận nhận tiền!</span>
+                        </div>
+                        <a href="<%= bannerApprovalUrl %>" class="btn btn-danger text-white btn-sm rounded-pill px-3 fw-bold">
+                            <i class="fa-solid fa-check-double me-1"></i> Duyệt Đơn Ngay
+                        </a>
+                    </div>
+                </div>
+            <% } %>
 
             <!-- Alerts -->
             <div class="px-4 pt-3">

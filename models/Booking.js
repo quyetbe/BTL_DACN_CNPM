@@ -1,6 +1,7 @@
 const { query, get, run } = require('../database/db');
 const QRCode = require('qrcode');
 const { emitBookingEvent } = require('../services/bookingEvents');
+const { formatPaymentMethod } = require('../services/paymentConfig');
 
 class Booking {
     static async createBooking({
@@ -104,14 +105,18 @@ class Booking {
             await run('DELETE FROM seat_locks WHERE showtime_id = ? AND session_id = ?', [showtimeId, sessionId]);
         }
 
-        // Phát sự kiện thời gian thực tới Admin & Client
+        // Phát sự kiện thời gian thực tới Admin & Manager & Client
         emitBookingEvent('created', {
             bookingId,
             bookingCode,
             userId,
+            customer_name: customerName,
+            total_amount: totalAmount,
+            ticket_count: createdTickets.length,
             payment_status: resolvedPaymentStatus,
             booking_status: resolvedBookingStatus,
-            payment_method: paymentMethod
+            payment_method: paymentMethod,
+            payment_method_label: formatPaymentMethod(paymentMethod)
         });
 
         return {

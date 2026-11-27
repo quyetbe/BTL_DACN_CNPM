@@ -421,6 +421,7 @@ async function handleConfirmPayment(bookingId, bookingCode, amtStr, btn) {
         if (data.success) {
             showAdminToast(`Đã xác nhận nhận tiền cho đơn ${bookingCode}! Trạng thái đã chuyển sang Đã thanh toán.`, 'success');
             if (data.counts) updateCountsUI(data.counts);
+            if (window.loadPendingNotifications) window.loadPendingNotifications(false);
             await refreshBookingsTable(false);
         } else {
             showAdminToast(data.message || 'Không thể duyệt đơn!', 'danger');
@@ -454,6 +455,7 @@ async function handleCancelBooking(bookingId, bookingCode, btn) {
         if (data.success) {
             showAdminToast(`Đã hủy đơn ${bookingCode} và giải phóng ghế!`, 'danger');
             if (data.counts) updateCountsUI(data.counts);
+            if (window.loadPendingNotifications) window.loadPendingNotifications(false);
             await refreshBookingsTable(false);
         } else {
             showAdminToast(data.message || 'Không thể hủy đơn!', 'danger');
@@ -465,22 +467,15 @@ async function handleCancelBooking(bookingId, bookingCode, btn) {
     }
 }
 
-// Kết nối SSE thời gian thực (đơn mới từ Client hiện ngay lập tức, không cần F5)
-(function initAdminLiveStream() {
-    if (typeof EventSource !== 'undefined') {
-        const es = new EventSource('/admin/api/bookings/stream');
-        es.onmessage = (evt) => {
-            try {
-                const payload = JSON.parse(evt.data);
-                if (payload && payload.type && payload.type !== 'connected') {
-                    refreshBookingsTable(payload.type === 'created');
-                }
-            } catch (e) {}
-        };
+// Lắng nghe sự kiện SSE thời gian thực dùng chung từ admin-footer.ejs (không tạo trùng kết nối SSE)
+window.addEventListener('cinestar:booking-change', (evt) => {
+    const payload = evt.detail;
+    if (payload && payload.type) {
+        refreshBookingsTable(false);
     }
-    // Fallback đồng bộ định kỳ mỗi 5 giây phòng khi kết nối SSE bị gián đoạn
-    setInterval(() => refreshBookingsTable(true), 5000);
-})();
+});
+// Fallback đồng bộ bảng định kỳ mỗi 8 giây
+setInterval(() => refreshBookingsTable(false), 8000);
 </script>
 
 <%- include('../layouts/admin-footer') %>

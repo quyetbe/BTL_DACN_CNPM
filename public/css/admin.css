@@ -220,6 +220,41 @@ body.admin-body {
     color: #64748b !important;
 }
 
+/* Thông báo đơn chờ duyệt trên Topbar */
+@keyframes cinestarBellRing {
+    0%, 100% { transform: rotate(0deg); }
+    15% { transform: rotate(16deg); }
+    30% { transform: rotate(-14deg); }
+    45% { transform: rotate(10deg); }
+    60% { transform: rotate(-8deg); }
+    75% { transform: rotate(4deg); }
+}
+
+.bell-ringing {
+    animation: cinestarBellRing 0.8s ease-in-out 2;
+}
+
+.notif-dropdown-menu {
+    width: 360px;
+    max-width: calc(100vw - 24px);
+    border-radius: 14px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 12px 32px rgba(15, 23, 42, 0.14) !important;
+}
+
+.notif-item {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s ease;
+}
+
+.notif-item:hover {
+    background-color: #f8fafc;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
 /* Tables in Admin */
 .admin-body .table,
 .admin-body .table-dark {
