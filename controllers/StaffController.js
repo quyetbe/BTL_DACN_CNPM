@@ -5,20 +5,24 @@ const Combo = require('../models/Combo');
 const Booking = require('../models/Booking');
 const Ticket = require('../models/Ticket');
 const { query } = require('../database/db');
+const { getSystemSettings, getEnabledPaymentMethods } = require('../services/paymentConfig');
 
 class StaffController {
     // 1. Giao diện bán vé tại quầy (POS Counter)
     static async pos(req, res) {
         try {
-            const todayStr = new Date().toISOString().split('T')[0];
+            const nowLocal = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const todayStr = `${nowLocal.getFullYear()}-${pad(nowLocal.getMonth() + 1)}-${pad(nowLocal.getDate())}`;
             const movies = await Movie.getNowShowing();
             const combos = await Combo.getAllActive();
             const cinemas = await query('SELECT * FROM cinemas WHERE status = "active" ORDER BY id ASC');
 
+            const activeStaff = req.currentUser || req.session.adminUser || req.session.user;
             // Xác định rạp đang bán vé: query param > cookie > user cinema_id > mặc định 1
             let selectedCinemaId = req.query.cinema_id || req.cookies.selectedCinemaId;
-            if (!selectedCinemaId && req.session.user && req.session.user.cinema_id) {
-                selectedCinemaId = req.session.user.cinema_id;
+            if (!selectedCinemaId && activeStaff && activeStaff.cinema_id) {
+                selectedCinemaId = activeStaff.cinema_id;
             }
             if (!selectedCinemaId) {
                 selectedCinemaId = 1;
@@ -27,8 +31,8 @@ class StaffController {
 
             const currentCinema = cinemas.find(c => Number(c.id) === selectedCinemaId) || cinemas[0];
 
-            // Lấy tất cả các suất chiếu hôm nay của rạp này (hoặc fallback nếu chưa có)
-            let showtimes = await query(`
+            // Lấy đúng các suất chiếu hôm nay của cơ sở đang chọn (không trộn suất chiếu của cơ sở khác)
+            const showtimes = await query(`
                 SELECT st.*, m.title as movie_title, m.poster_url, m.duration,
                        r.room_name, r.screen_type, r.cinema_id,
                        c.name as cinema_name, c.city as cinema_city, c.address as cinema_address
@@ -40,19 +44,8 @@ class StaffController {
                 ORDER BY st.start_time ASC
             `, [todayStr, selectedCinemaId]);
 
-            if (showtimes.length === 0) {
-                showtimes = await query(`
-                    SELECT st.*, m.title as movie_title, m.poster_url, m.duration,
-                           r.room_name, r.screen_type, r.cinema_id,
-                           c.name as cinema_name, c.city as cinema_city, c.address as cinema_address
-                    FROM showtimes st
-                    JOIN movies m ON st.movie_id = m.id
-                    JOIN rooms r ON st.room_id = r.id
-                    JOIN cinemas c ON r.cinema_id = c.id
-                    WHERE DATE(st.start_time) = DATE(?) AND st.status = 'scheduled'
-                    ORDER BY st.start_time ASC
-                `, [todayStr]);
-            }
+            const paymentSettings = await getSystemSettings();
+            const paymentMethods = getEnabledPaymentMethods(paymentSettings);
 
             res.render('staff/pos', {
                 title: 'Hệ Thống Bán Vé Tại Quầy (POS Counter)',
@@ -63,7 +56,9 @@ class StaffController {
                 selectedCinemaId,
                 currentCinema,
                 todayStr,
-                staffUser: req.session.user
+                paymentSettings,
+                paymentMethods,
+                staffUser: activeStaff
             });
         } catch (err) {
             console.error('Lỗi POS:', err);
@@ -132,6 +127,7 @@ class StaffController {
                 }
             }
 
+            const activeStaff = req.currentUser || req.session.adminUser || req.session.user;
             const result = await Booking.createBooking({
                 userId: null,
                 customerName: customer_name || 'Khách vãng lai (Quầy)',
@@ -142,7 +138,7 @@ class StaffController {
                 combos: comboList,
                 paymentMethod: payment_method || 'cash',
                 bookingType: 'pos',
-                createdBy: req.session.user.id,
+                createdBy: activeStaff ? activeStaff.id : null,
                 sessionId: req.sessionID
             });
 
@@ -232,7 +228,8 @@ class StaffController {
                 } catch (e) {}
             }
 
-            const staffId = (req.session && req.session.user) ? req.session.user.id : 3;
+            const activeStaff = req.currentUser || req.session.adminUser || req.session.user;
+            const staffId = activeStaff ? activeStaff.id : 3;
             const result = await Ticket.checkIn(code, staffId);
 
             res.json(result);

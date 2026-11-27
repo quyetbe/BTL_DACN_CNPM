@@ -1,46 +1,224 @@
 <%- include('../layouts/admin-header') %>
 
-<div class="card bg-card border-secondary p-4 rounded-4 shadow mb-4">
-    <div class="border-bottom border-secondary pb-3 mb-4">
-        <h4 class="text-white fw-bold mb-1">Cấu Hình Toàn Bộ Hệ Thống Rạp</h4>
-        <p class="text-secondary small mb-0">Thiết lập các thông số hoạt động, quy định thời gian đệm và giữ chỗ</p>
-    </div>
+<form action="/admin/settings" method="POST">
+    <!-- PHẦN 1: CẤU HÌNH HỆ THỐNG RẠP & BẢO MẬT -->
+    <div class="card bg-white border p-4 rounded-4 shadow-sm mb-4">
+        <div class="border-bottom pb-3 mb-4">
+            <h4 class="text-dark fw-bold mb-1">
+                <i class="fa-solid fa-sliders text-danger me-2"></i>Cấu Hình Hệ Thống Rạp & Bảo Mật
+            </h4>
+            <p class="text-muted small mb-0">Thiết lập thông số vận hành rạp, thời gian giữ ghế và chính sách tự động khóa tài khoản khi nhập sai mật khẩu</p>
+        </div>
 
-    <form action="/admin/settings" method="POST">
         <div class="row g-3">
             <div class="col-md-6">
-                <label class="form-label text-light small fw-bold">Tên cụm rạp</label>
-                <input type="text" name="cinema_name" class="form-control bg-dark border-secondary text-white" value="<%= settings.cinema_name || 'CINESTAR CINEMA COMPLEX' %>" required>
+                <label class="form-label text-dark small fw-bold">Tên cụm rạp</label>
+                <input type="text" name="cinema_name" class="form-control" value="<%= settings.cinema_name || 'CINESTAR CINEMA COMPLEX' %>" required>
             </div>
             <div class="col-md-6">
-                <label class="form-label text-light small fw-bold">Hotline liên hệ</label>
-                <input type="text" name="hotline" class="form-control bg-dark border-secondary text-white" value="<%= settings.hotline || '1900 6868' %>">
+                <label class="form-label text-dark small fw-bold">Hotline liên hệ</label>
+                <input type="text" name="hotline" class="form-control" value="<%= settings.hotline || '1900 6017' %>">
             </div>
 
             <div class="col-12">
-                <label class="form-label text-light small fw-bold">Địa chỉ rạp chiếu</label>
-                <input type="text" name="address" class="form-control bg-dark border-secondary text-white" value="<%= settings.address || '' %>">
+                <label class="form-label text-dark small fw-bold">Địa chỉ rạp chiếu</label>
+                <input type="text" name="address" class="form-control" value="<%= settings.address || '' %>">
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label text-light small fw-bold">Thời gian đệm dọn dẹp & vệ sinh phòng chiếu (Phút)</label>
-                <input type="number" name="buffer_time" class="form-control bg-dark border-secondary text-white" min="5" max="60" value="<%= settings.buffer_time || '15' %>" required>
-                <div class="form-text text-secondary small">Dùng cho Thuật toán kiểm tra xung đột suất chiếu [Start, End + Buffer].</div>
+            <div class="col-md-4">
+                <label class="form-label text-dark small fw-bold">Thời gian đệm dọn dẹp phòng (Phút)</label>
+                <input type="number" name="buffer_time" class="form-control" min="5" max="60" value="<%= settings.buffer_time || '15' %>" required>
+                <div class="form-text text-muted small">Áp dụng cho thuật toán chống xung đột suất chiếu.</div>
             </div>
 
-            <div class="col-md-6">
-                <label class="form-label text-light small fw-bold">Thời gian khóa giữ ghế tạm thời khi thanh toán (Phút)</label>
-                <input type="number" name="seat_lock_time" class="form-control bg-dark border-secondary text-white" min="1" max="15" value="<%= settings.seat_lock_time || '5' %>" required>
-                <div class="form-text text-secondary small">Dùng cho Kỹ thuật khóa giữ ghế tạm thời (Race Condition Prevention).</div>
+            <div class="col-md-4">
+                <label class="form-label text-dark small fw-bold">Thời gian khóa giữ ghế tạm (Phút)</label>
+                <input type="number" name="seat_lock_time" class="form-control" min="1" max="15" value="<%= settings.seat_lock_time || '5' %>" required>
+                <div class="form-text text-muted small">Chống tranh chấp ghế khi thanh toán (Race Condition).</div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label text-dark small fw-bold">Số lần nhập sai mật khẩu tối đa</label>
+                <input type="number" name="max_login_attempts" class="form-control" min="1" max="20" value="<%= settings.max_login_attempts || '5' %>" required>
+                <div class="form-text text-danger small fw-semibold"><i class="fa-solid fa-shield-halved me-1"></i>Tự động khóa tài khoản khi sai đủ số lần này (mặc định: 5).</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PHẦN 2: CẤU HÌNH CÁC PHƯƠNG THỨC THANH TOÁN -->
+    <div class="card bg-white border p-4 rounded-4 shadow-sm mb-4">
+        <div class="border-bottom pb-3 mb-4 d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <h4 class="text-dark fw-bold mb-1">
+                    <i class="fa-solid fa-credit-card text-danger me-2"></i>Cấu Hình Các Phương Thức Thanh Toán
+                </h4>
+                <p class="text-muted small mb-0">
+                    <strong>VNPAY, MoMo, ZaloPay</strong> tự động xác nhận <strong>Đã thanh toán</strong> ngay lập tức.
+                    <strong>VietQR Ngân hàng, Thẻ, Tiền mặt</strong> ở trạng thái chờ cho đến khi Admin ấn <strong>"Đã nhận tiền"</strong> tại mục <a href="/admin/approvals" class="text-danger fw-bold text-decoration-none">Duyệt Đơn Thanh Toán</a>.
+                </p>
             </div>
         </div>
 
-        <div class="mt-4 pt-3 border-top border-secondary text-end">
-            <button type="submit" class="btn btn-danger rounded-pill px-4 fw-bold">
-                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Cấu Hình Hệ Thống
+        <div class="row g-4">
+            <!-- 1. Chuyển khoản ngân hàng VietQR -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #0033a0 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #0033a0;"><i class="fa-solid fa-qrcode me-1"></i> VIETQR</span>
+                            <strong class="text-dark">Chuyển Khoản Ngân Hàng</strong>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning" style="font-size: 0.7rem;">Admin duyệt</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swMbbank" name="payment_mbbank_enabled" value="1" <%= settings.payment_mbbank_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swMbbank">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <label class="form-label small mb-1">Mã ngân hàng</label>
+                            <input type="text" name="payment_bank_code" class="form-control form-control-sm" value="<%= settings.payment_bank_code || 'MB' %>" placeholder="MB, VCB, TCB...">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label small mb-1">Tên ngân hàng hiển thị</label>
+                            <input type="text" name="payment_bank_name" class="form-control form-control-sm" value="<%= settings.payment_bank_name || 'Ngân hàng TMCP Quân đội (MBBank)' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Số tài khoản (STK)</label>
+                            <input type="text" name="payment_bank_account" class="form-control form-control-sm font-monospace" value="<%= settings.payment_bank_account || '033320012005' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Chủ tài khoản</label>
+                            <input type="text" name="payment_bank_owner" class="form-control form-control-sm text-uppercase" value="<%= settings.payment_bank_owner || 'NGUYEN MANH QUYET' %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Cổng VNPAY (Tự động) -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #0284c7 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #0284c7;">VNPAY</span>
+                            <strong class="text-dark">Cổng VNPAY-QR / ATM Nội Địa</strong>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;"><i class="fa-solid fa-bolt me-1"></i>Tự động</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swVnpay" name="payment_vnpay_enabled" value="1" <%= settings.payment_vnpay_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swVnpay">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <label class="form-label small mb-1">Mã điểm chấp nhận (Terminal / TMN Code)</label>
+                            <input type="text" name="payment_vnpay_tmn" class="form-control form-control-sm font-monospace" value="<%= settings.payment_vnpay_tmn || 'CINESTARVN01' %>">
+                            <div class="form-text small">Thanh toán tự động: đơn hàng chuyển ngay sang trạng thái <strong>Đã thanh toán</strong> và cấp mã QR vào rạp.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Ví MoMo (Tự động) -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #a50064 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #a50064;">MOMO</span>
+                            <strong class="text-dark">Ví Điện Tử MoMo</strong>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;"><i class="fa-solid fa-bolt me-1"></i>Tự động</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swMomo" name="payment_momo_enabled" value="1" <%= settings.payment_momo_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swMomo">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Số điện thoại ví MoMo</label>
+                            <input type="text" name="payment_momo_phone" class="form-control form-control-sm font-monospace" value="<%= settings.payment_momo_phone || '033320012005' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Tên chủ ví MoMo</label>
+                            <input type="text" name="payment_momo_owner" class="form-control form-control-sm text-uppercase" value="<%= settings.payment_momo_owner || 'NGUYEN MANH QUYET' %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Ví ZaloPay (Tự động) -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #0068ff !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #0068ff;">ZALOPAY</span>
+                            <strong class="text-dark">Ví Điện Tử ZaloPay</strong>
+                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.7rem;"><i class="fa-solid fa-bolt me-1"></i>Tự động</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swZalopay" name="payment_zalopay_enabled" value="1" <%= settings.payment_zalopay_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swZalopay">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Số điện thoại ví ZaloPay</label>
+                            <input type="text" name="payment_zalopay_phone" class="form-control form-control-sm font-monospace" value="<%= settings.payment_zalopay_phone || '033320012005' %>">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label small mb-1">Tên chủ ví ZaloPay</label>
+                            <input type="text" name="payment_zalopay_owner" class="form-control form-control-sm text-uppercase" value="<%= settings.payment_zalopay_owner || 'NGUYEN MANH QUYET' %>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Thẻ Quốc tế / ATM -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #d97706 !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge bg-warning text-dark px-2 py-1 fw-bold">VISA / ATM</span>
+                            <strong class="text-dark">Thẻ Quốc Tế & Thẻ ATM (3D-Secure)</strong>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning" style="font-size: 0.7rem;">Admin duyệt</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swCard" name="payment_card_enabled" value="1" <%= settings.payment_card_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swCard">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">Cho phép khách hàng nhập thông tin thẻ Visa, MasterCard, JCB hoặc thẻ ATM nội địa. Hệ thống chỉ lưu 4 số cuối của thẻ để Admin đối soát an toàn.</p>
+                </div>
+            </div>
+
+            <!-- 6. Tiền mặt tại quầy -->
+            <div class="col-lg-6">
+                <div class="payment-config-card p-3 h-100" style="border-top: 4px solid #16a34a !important;">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span class="badge bg-success text-white px-2 py-1 fw-bold">TIỀN MẶT</span>
+                            <strong class="text-dark">Thanh Toán Tiền Mặt Tại Quầy Vé</strong>
+                            <span class="badge bg-warning-subtle text-warning-emphasis border border-warning" style="font-size: 0.7rem;">Admin duyệt</span>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch" id="swCash" name="payment_cash_enabled" value="1" <%= settings.payment_cash_enabled !== '0' ? 'checked' : '' %>>
+                            <label class="form-check-label text-dark small fw-semibold" for="swCash">Kích hoạt</label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="form-label small mb-1">Ghi chú hướng dẫn cho khách hàng</label>
+                        <input type="text" name="payment_cash_note" class="form-control form-control-sm" value="<%= settings.payment_cash_note || '' %>">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-top text-end">
+            <button type="submit" class="btn btn-danger text-white rounded-pill px-4 py-2 fw-bold shadow-sm">
+                <i class="fa-solid fa-floppy-disk me-1"></i> Lưu Toàn Bộ Cấu Hình Hệ Thống & Thanh Toán
             </button>
         </div>
-    </form>
-</div>
+    </div>
+</form>
 
 <%- include('../layouts/admin-footer') %>

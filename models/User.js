@@ -22,7 +22,8 @@ class User {
 
     static async getAll() {
         return await query(`
-            SELECT u.id, u.full_name, u.email, u.phone, u.avatar, u.status, u.created_at,
+            SELECT u.id, u.full_name, u.email, u.phone, u.avatar, u.status,
+                   u.failed_login_attempts, u.locked_at, u.created_at,
                    r.id as role_id, r.name as role_name, r.display_name as role_display
             FROM users u
             JOIN roles r ON u.role_id = r.id
@@ -45,21 +46,68 @@ class User {
     }
 
     static async update(id, { full_name, phone, role_id, status, password }) {
+        const resetLockSql = status === 'active' ? ', failed_login_attempts = 0, locked_at = NULL' : '';
         if (password && password.trim() !== '') {
             const salt = bcrypt.genSaltSync(10);
             const password_hash = bcrypt.hashSync(password, salt);
             return await run(`
                 UPDATE users
-                SET full_name = ?, phone = ?, role_id = ?, status = ?, password_hash = ?
+                SET full_name = ?, phone = ?, role_id = ?, status = ?, password_hash = ?${resetLockSql}
                 WHERE id = ?
             `, [full_name, phone, role_id, status, password_hash, id]);
         } else {
             return await run(`
                 UPDATE users
-                SET full_name = ?, phone = ?, role_id = ?, status = ?
+                SET full_name = ?, phone = ?, role_id = ?, status = ?${resetLockSql}
                 WHERE id = ?
             `, [full_name, phone, role_id, status, id]);
         }
+    }
+
+    static async recordFailedLogin(id, maxAttempts = 5) {
+        const user = await get('SELECT id, failed_login_attempts, status FROM users WHERE id = ?', [id]);
+        if (!user) return { attempts: 0, locked: false };
+
+        const newAttempts = Number(user.failed_login_attempts || 0) + 1;
+        const shouldLock = newAttempts >= maxAttempts;
+
+        if (shouldLock) {
+            await run(
+                `UPDATE users SET failed_login_attempts = ?, status = 'locked', locked_at = NOW() WHERE id = ?`,
+                [newAttempts, id]
+            );
+        } else {
+            await run(
+                `UPDATE users SET failed_login_attempts = ? WHERE id = ?`,
+                [newAttempts, id]
+            );
+        }
+
+        return {
+            attempts: newAttempts,
+            remaining: Math.max(0, maxAttempts - newAttempts),
+            locked: shouldLock
+        };
+    }
+
+    static async resetFailedLogins(id) {
+        return await run(
+            `UPDATE users SET failed_login_attempts = 0, locked_at = NULL WHERE id = ?`,
+            [id]
+        );
+    }
+
+    static async setStatus(id, status) {
+        if (status === 'active') {
+            return await run(
+                `UPDATE users SET status = 'active', failed_login_attempts = 0, locked_at = NULL WHERE id = ?`,
+                [id]
+            );
+        }
+        return await run(
+            `UPDATE users SET status = 'locked', locked_at = NOW() WHERE id = ?`,
+            [id]
+        );
     }
 
     static async updateProfile(id, { full_name, phone }) {

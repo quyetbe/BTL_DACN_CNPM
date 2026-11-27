@@ -1,15 +1,21 @@
 <%- include('../layouts/header') %>
 
+<% const isAdminPortal = (typeof portal !== 'undefined' && portal === 'admin'); %>
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-6 col-lg-5">
             <div class="card bg-white border-0 shadow-lg rounded-4 overflow-hidden">
-                <div class="card-header bg-light border-bottom text-center py-4">
+                <div class="card-header <%= isAdminPortal ? 'bg-dark text-white' : 'bg-light text-dark' %> border-bottom text-center py-4">
                     <div class="bg-danger text-white rounded-3 p-2 d-inline-flex align-items-center justify-content-center mb-2 shadow-sm">
-                        <i class="fa-solid fa-film fs-3"></i>
+                        <i class="fa-solid <%= isAdminPortal ? 'fa-shield-halved' : 'fa-film' %> fs-3"></i>
                     </div>
-                    <h4 class="text-dark fw-bold mb-0">Đăng Nhập CINESTAR</h4>
-                    <p class="text-muted small mb-0">Hệ thống đặt vé & quản lý suất chiếu rạp</p>
+                    <h4 class="<%= isAdminPortal ? 'text-white' : 'text-dark' %> fw-bold mb-1">
+                        <%= isAdminPortal ? 'Cổng Quản Trị Admin / Manager' : 'Đăng Nhập Khách Hàng CINESTAR' %>
+                    </h4>
+                    <p class="<%= isAdminPortal ? 'text-white-50' : 'text-muted' %> small mb-0">
+                        <%= isAdminPortal ? 'Phiên đăng nhập độc lập — chạy song song với giao diện Khách hàng' : 'Hệ thống đặt vé & quản lý suất chiếu rạp' %>
+                    </p>
                 </div>
                 <div class="card-body p-4 p-md-5">
                     <% if (typeof error !== 'undefined' && error) { %>
@@ -19,6 +25,7 @@
                     <% } %>
 
                     <form action="/auth/login" method="POST">
+                        <input type="hidden" name="portal" value="<%= isAdminPortal ? 'admin' : 'client' %>">
                         <input type="hidden" name="returnTo" value="<%= typeof returnTo !== 'undefined' ? returnTo : '' %>">
 
                         <div class="mb-3">
@@ -27,7 +34,7 @@
                                 <span class="input-group-text bg-light text-muted">
                                     <i class="fa-solid fa-envelope"></i>
                                 </span>
-                                <input type="email" name="email" id="inputEmail" class="form-control" placeholder="name@cinema.com" required>
+                                <input type="email" name="email" id="inputEmail" class="form-control" value="<%= typeof emailValue !== 'undefined' ? emailValue : '' %>" placeholder="name@cinema.com" required>
                             </div>
                         </div>
 
@@ -39,10 +46,13 @@
                                 </span>
                                 <input type="password" name="password" id="inputPassword" class="form-control" placeholder="••••••••" required>
                             </div>
+                            <div class="form-text small text-muted">
+                                <i class="fa-solid fa-shield-halved text-warning me-1"></i> Tài khoản sẽ tự động bị khóa nếu nhập sai mật khẩu quá 5 lần.
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-danger w-100 py-2 fw-bold rounded-pill mb-3 shadow-sm">
-                            <i class="fa-solid fa-right-to-bracket me-2"></i> Đăng Nhập
+                            <i class="fa-solid fa-right-to-bracket me-2"></i> <%= isAdminPortal ? 'Đăng Nhập Quản Trị' : 'Đăng Nhập' %>
                         </button>
                     </form>
 
@@ -52,23 +62,46 @@
                             <i class="fa-solid fa-bolt text-warning me-1"></i> CHỌN NHANH TÀI KHOẢN DEMO:
                         </div>
                         <div class="d-grid gap-2">
-                            <button class="btn btn-outline-danger btn-sm text-start" onclick="fillDemo('admin@cinema.com', 'admin123')">
-                                <i class="fa-solid fa-shield-halved me-1"></i> <strong>Admin:</strong> admin@cinema.com (Quản trị viên)
-                            </button>
-                            <button class="btn btn-outline-primary btn-sm text-start" onclick="fillDemo('manager@cinema.com', 'manager123')">
-                                <i class="fa-solid fa-chart-line me-1"></i> <strong>Manager:</strong> manager@cinema.com (Quản lý rạp)
-                            </button>
-                            <button class="btn btn-outline-warning btn-sm text-start" onclick="fillDemo('staff@cinema.com', 'staff123')">
-                                <i class="fa-solid fa-cash-register me-1"></i> <strong>Staff:</strong> staff@cinema.com (Nhân viên bán & soát vé)
-                            </button>
-                            <button class="btn btn-outline-success btn-sm text-start" onclick="fillDemo('client@cinema.com', 'client123')">
-                                <i class="fa-solid fa-user me-1"></i> <strong>Client:</strong> client@cinema.com (Khách hàng)
-                            </button>
+                            <% if (isAdminPortal) { %>
+                                <button type="button" class="btn btn-outline-danger btn-sm text-start" onclick="fillDemo('admin@cinema.com', 'admin123')">
+                                    <i class="fa-solid fa-shield-halved me-1"></i> <strong>Admin:</strong> admin@cinema.com (Duyệt đơn & Cấu hình)
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm text-start" onclick="fillDemo('manager@cinema.com', 'manager123')">
+                                    <i class="fa-solid fa-chart-line me-1"></i> <strong>Manager:</strong> manager@cinema.com (Quản lý rạp)
+                                </button>
+                                <button type="button" class="btn btn-outline-warning text-dark btn-sm text-start" onclick="fillDemo('staff@cinema.com', 'staff123')">
+                                    <i class="fa-solid fa-cash-register me-1"></i> <strong>Staff:</strong> staff@cinema.com (Bán POS & Soát vé)
+                                </button>
+                            <% } else { %>
+                                <button type="button" class="btn btn-outline-success btn-sm text-start" onclick="fillDemo('client@cinema.com', 'client123')">
+                                    <i class="fa-solid fa-user me-1"></i> <strong>Client:</strong> client@cinema.com (Khách hàng đặt vé)
+                                </button>
+                                <button type="button" class="btn btn-outline-danger btn-sm text-start" onclick="fillDemo('admin@cinema.com', 'admin123')">
+                                    <i class="fa-solid fa-shield-halved me-1"></i> <strong>Admin:</strong> admin@cinema.com (Quản trị viên)
+                                </button>
+                                <button type="button" class="btn btn-outline-primary btn-sm text-start" onclick="fillDemo('manager@cinema.com', 'manager123')">
+                                    <i class="fa-solid fa-chart-line me-1"></i> <strong>Manager:</strong> manager@cinema.com (Quản lý rạp)
+                                </button>
+                                <button type="button" class="btn btn-outline-warning text-dark btn-sm text-start" onclick="fillDemo('staff@cinema.com', 'staff123')">
+                                    <i class="fa-solid fa-cash-register me-1"></i> <strong>Staff:</strong> staff@cinema.com (Nhân viên bán & soát vé)
+                                </button>
+                            <% } %>
                         </div>
                     </div>
 
-                    <div class="text-center mt-4 text-muted small">
-                        Chưa có tài khoản? <a href="/auth/register<%= typeof returnTo !== 'undefined' && returnTo ? '?redirect=' + encodeURIComponent(returnTo) : '' %>" class="text-danger fw-bold text-decoration-none">Đăng ký ngay</a>
+                    <div class="border-top pt-3 mt-3 text-center small">
+                        <% if (isAdminPortal) { %>
+                            <a href="http://localhost:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>" target="_blank" class="btn btn-outline-success btn-sm rounded-pill px-3 fw-semibold">
+                                <i class="fa-solid fa-window-restore me-1"></i> Mở Giao Diện Khách Hàng Song Song (:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>)
+                            </a>
+                        <% } else { %>
+                            <div class="text-muted mb-2">
+                                Chưa có tài khoản? <a href="/auth/register<%= typeof returnTo !== 'undefined' && returnTo ? '?redirect=' + encodeURIComponent(returnTo) : '' %>" class="text-danger fw-bold text-decoration-none">Đăng ký ngay</a>
+                            </div>
+                            <a href="http://localhost:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>" target="_blank" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-semibold">
+                                <i class="fa-solid fa-shield-halved me-1"></i> Mở Cổng Quản Trị Admin / Manager Song Song (:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>)
+                            </a>
+                        <% } %>
                     </div>
                 </div>
             </div>

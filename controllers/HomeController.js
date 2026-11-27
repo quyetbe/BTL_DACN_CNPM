@@ -8,9 +8,12 @@ class HomeController {
             const nowShowing = await Movie.getNowShowing();
             const comingSoon = await Movie.getComingSoon();
 
-            // Lấy danh sách suất chiếu hôm nay
-            const todayStr = new Date().toISOString().split('T')[0];
-            const selectedCinemaId = req.cookies.selectedCinemaId || req.query.cinema_id || null;
+            // Lấy danh sách suất chiếu hôm nay theo giờ địa phương (tránh lệch múi giờ UTC)
+            const nowLocal = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const todayStr = `${nowLocal.getFullYear()}-${pad(nowLocal.getMonth() + 1)}-${pad(nowLocal.getDate())}`;
+            const rawCinemaId = req.query.cinema_id || req.cookies.selectedCinemaId || null;
+            const selectedCinemaId = rawCinemaId ? Number(rawCinemaId) : null;
 
             let todayShowtimes = [];
             let currentCinema = null;
@@ -19,6 +22,7 @@ class HomeController {
                 const cinRows = await query('SELECT * FROM cinemas WHERE id = ?', [selectedCinemaId]);
                 if (cinRows.length > 0) currentCinema = cinRows[0];
 
+                // Khi đã chọn cơ sở rạp -> CHỈ hiển thị đúng suất chiếu của cơ sở đó (không trộn suất chiếu của cơ sở khác)
                 todayShowtimes = await query(`
                     SELECT st.*, m.title as movie_title, m.poster_url, m.age_rating, m.duration,
                            r.room_name, r.screen_type, r.cinema_id,
@@ -31,9 +35,8 @@ class HomeController {
                     ORDER BY st.start_time ASC
                     LIMIT 16
                 `, [todayStr, selectedCinemaId]);
-            }
-
-            if (todayShowtimes.length === 0) {
+            } else {
+                // Chỉ hiện toàn hệ thống khi người dùng CHƯA chọn cơ sở nào
                 todayShowtimes = await query(`
                     SELECT st.*, m.title as movie_title, m.poster_url, m.age_rating, m.duration,
                            r.room_name, r.screen_type, r.cinema_id,

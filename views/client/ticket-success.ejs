@@ -1,19 +1,79 @@
 <%- include('../layouts/header') %>
 
+<%
+    const isCancelled = booking.booking_status === 'cancelled' || booking.payment_status === 'failed';
+    const isPaid = !isCancelled && booking.payment_status === 'paid';
+    const isPending = !isCancelled && !isPaid;
+%>
+
 <div class="container py-4 mb-5">
-    <!-- Thông Báo Đặt Vé Thành Công -->
+    <!-- Thông Báo Trạng Thái Đơn Hàng (Tự động cập nhật thời gian thực không cần reload) -->
     <div class="text-center py-4 mb-3">
-        <div class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px;">
-            <i class="fa-solid fa-check display-5"></i>
+        <% if (isCancelled) { %>
+            <div id="statusHeroIcon" class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px;">
+                <i class="fa-solid fa-xmark display-5"></i>
+            </div>
+            <h2 id="statusHeroTitle" class="text-danger fw-extrabold mb-1">ĐƠN HÀNG ĐÃ BỊ HỦY</h2>
+            <p id="statusHeroSubtitle" class="text-muted fs-6 mb-2"><%= booking.payment_note || 'Đơn đặt vé đã bị hủy bởi quản trị viên.' %></p>
+        <% } else if (isPending) { %>
+            <div id="statusHeroIcon" class="rounded-circle bg-warning text-dark d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px;">
+                <i class="fa-solid fa-hourglass-half display-6"></i>
+            </div>
+            <h2 id="statusHeroTitle" class="text-dark fw-extrabold mb-1">ĐẶT VÉ THÀNH CÔNG - CHỜ DUYỆT THANH TOÁN</h2>
+            <p id="statusHeroSubtitle" class="text-muted fs-6 mb-2">Ghế của bạn đã được giữ. Trang sẽ <strong class="text-success">tự động cập nhật sang Đã thanh toán</strong> ngay khi Admin xác nhận đã nhận tiền (không cần tải lại trang).</p>
+        <% } else { %>
+            <div id="statusHeroIcon" class="rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 76px; height: 76px;">
+                <i class="fa-solid fa-check display-5"></i>
+            </div>
+            <h2 id="statusHeroTitle" class="text-dark fw-extrabold mb-1">ĐẶT VÉ & THANH TOÁN THÀNH CÔNG!</h2>
+            <p id="statusHeroSubtitle" class="text-muted fs-6 mb-2">Cảm ơn bạn đã lựa chọn CINESTAR CINEMA COMPLEX</p>
+        <% } %>
+
+        <div class="d-flex justify-content-center flex-wrap gap-2 mt-2">
+            <span class="badge bg-light text-dark border fs-6 px-3 py-2 shadow-sm">
+                MÃ ĐƠN HÀNG: <strong class="text-danger"><%= booking.booking_code %></strong>
+            </span>
+            <% if (isPending) { %>
+                <span id="liveWaitingPill" class="badge bg-warning-subtle text-warning-emphasis border border-warning rounded-pill px-3 py-2 d-inline-flex align-items-center gap-2 d-print-none">
+                    <span class="spinner-grow spinner-grow-sm text-warning" role="status"></span>
+                    <span>Đang tự động cập nhật trực tiếp...</span>
+                </span>
+            <% } %>
         </div>
-        <h2 class="text-dark fw-extrabold mb-1">ĐẶT VÉ THÀNH CÔNG!</h2>
-        <p class="text-muted fs-6 mb-2">Cảm ơn bạn đã lựa chọn CINESTAR CINEMA COMPLEX</p>
-        <span class="badge bg-light text-dark border fs-6 px-3 py-2 shadow-sm">
-            MÃ ĐƠN HÀNG: <strong class="text-danger"><%= booking.booking_code %></strong>
-        </span>
     </div>
 
-    <!-- Danh Sách Vé Điện Tử Với Mã QR (Light Theme) -->
+    <!-- Banner thông báo duyệt thành công thời gian thực (ẩn sẵn khi đang pending) -->
+    <div id="liveApprovedBanner" class="row justify-content-center mb-4 d-none">
+        <div class="col-lg-10">
+            <div class="alert alert-success border-success rounded-4 shadow-sm d-flex align-items-center gap-3 mb-0">
+                <i class="fa-solid fa-circle-check fs-3 text-success"></i>
+                <div>
+                    <div class="fw-bold text-success fs-6">Admin đã xác nhận nhận tiền thành công!</div>
+                    <div class="small text-dark">Trạng thái đơn hàng đã tự động chuyển sang <strong>Đã thanh toán</strong> và mã QR vé bên dưới đã được mở khóa sẵn sàng vào rạp.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <% if (isPending) { %>
+        <div id="pendingAlertBox" class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="alert alert-warning border-warning rounded-4 shadow-sm d-flex align-items-start gap-3 mb-0">
+                    <i class="fa-solid fa-circle-info fs-4 text-warning-emphasis mt-1"></i>
+                    <div class="small">
+                        <div class="fw-bold text-dark fs-6 mb-1">Đơn hàng đang chờ Admin xác nhận đã nhận tiền</div>
+                        <div>Phương thức đã chọn: <strong><%= formatPaymentMethod(booking.payment_method) %></strong> — Số tiền: <strong class="text-danger"><%= Number(booking.total_amount).toLocaleString('vi-VN') %> đ</strong>.</div>
+                        <% if (booking.payment_note) { %>
+                            <div>Ghi chú thanh toán: <code><%= booking.payment_note %></code></div>
+                        <% } %>
+                        <div class="mt-1 text-secondary">Bạn cứ giữ nguyên trang này — ngay khi Admin ấn <strong>"Đã nhận tiền"</strong>, màn hình sẽ tự động chuyển sang <strong>Đã thanh toán</strong> và mở khóa mã QR vé.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% } %>
+
+    <!-- Danh Sách Vé Điện Tử Với Mã QR -->
     <div class="row justify-content-center">
         <div class="col-lg-10">
             <div class="card bg-white border-0 p-4 rounded-4 shadow-sm mb-4">
@@ -28,28 +88,40 @@
                         <div class="mt-1 text-danger small fw-semibold">
                             <i class="fa-solid fa-location-dot me-1"></i> <strong><%= booking.cinema_name || 'Cinestar Cinema' %></strong> - <%= booking.cinema_address || '' %>
                         </div>
-                        <div class="mt-2 text-secondary small">
-                            <span class="badge bg-success-subtle text-success border border-success-subtle me-2">
-                                <i class="fa-solid fa-circle-check me-1"></i> Đã thanh toán: <%= Number(booking.total_amount).toLocaleString('vi-VN') %> đ
-                            </span>
-                            <% if (booking.payment_method === 'mbbank_qr' || booking.payment_method === 'vnpay') { %>
-                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                                    <i class="fa-solid fa-qrcode me-1"></i> MBBank VietQR (033320012005 - NGUYEN MANH QUYET)
+                        <div class="mt-2 text-secondary small d-flex flex-wrap gap-2">
+                            <% if (isPaid) { %>
+                                <span id="paymentStatusBadge" class="badge bg-success-subtle text-success border border-success-subtle">
+                                    <i class="fa-solid fa-circle-check me-1"></i> Đã thanh toán: <%= Number(booking.total_amount).toLocaleString('vi-VN') %> đ
+                                </span>
+                            <% } else if (isCancelled) { %>
+                                <span id="paymentStatusBadge" class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                                    <i class="fa-solid fa-circle-xmark me-1"></i> Đã hủy
                                 </span>
                             <% } else { %>
-                                <span class="badge bg-secondary-subtle text-secondary border">
-                                    Phương thức: <%= booking.payment_method %>
+                                <span id="paymentStatusBadge" class="badge bg-warning-subtle text-warning-emphasis border border-warning">
+                                    <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận nhận tiền: <%= Number(booking.total_amount).toLocaleString('vi-VN') %> đ
                                 </span>
                             <% } %>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                                <i class="fa-solid fa-credit-card me-1"></i> <%= formatPaymentMethod(booking.payment_method) %>
+                            </span>
+                            <span id="confirmedAtBadge" class="badge bg-light text-secondary border <%= (isPaid && booking.confirmed_at) ? '' : 'd-none' %>">
+                                Duyệt lúc: <%= booking.confirmed_at ? formatDateTime(booking.confirmed_at) : '' %>
+                            </span>
                         </div>
                     </div>
                     <div class="mt-3 mt-md-0 d-print-none d-flex flex-wrap gap-2">
+                        <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role_name === 'admin' || currentUser.role_name === 'manager')) { %>
+                            <a href="<%= currentUser.role_name === 'manager' ? '/manager/approvals' : '/admin/approvals' %>" class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                                <i class="fa-solid fa-clipboard-check me-1"></i> Quản Lý Duyệt Đơn
+                            </a>
+                        <% } %>
                         <% if (typeof currentUser !== 'undefined' && currentUser && (currentUser.role_name === 'staff' || currentUser.role_name === 'manager' || currentUser.role_name === 'admin')) { %>
                             <a href="/staff/pos" class="btn btn-warning btn-sm rounded-pill px-3 fw-bold shadow-sm">
                                 <i class="fa-solid fa-cash-register me-1"></i> Quay Lại Bán Vé POS
                             </a>
                         <% } %>
-                        <button onclick="window.print()" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                        <button id="printTicketBtn" onclick="window.print()" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm <%= isPaid ? '' : 'd-none' %>">
                             <i class="fa-solid fa-print me-1"></i> In Vé / Lưu PDF
                         </button>
                     </div>
@@ -65,17 +137,34 @@
                                         <i class="fa-solid fa-ticket text-danger fs-4"></i>
                                         <span class="fw-bold text-dark">VÉ ĐIỆN TỬ</span>
                                     </div>
-                                    <span class="badge <%= tkt.status === 'unused' ? 'bg-success' : 'bg-secondary' %>">
-                                        <%= tkt.status === 'unused' ? 'Chưa sử dụng' : 'Đã soát vé' %>
-                                    </span>
+                                    <% if (isCancelled || tkt.status === 'cancelled') { %>
+                                        <span class="badge bg-danger ticket-status-badge">Đã hủy</span>
+                                    <% } else if (isPending) { %>
+                                        <span class="badge bg-warning text-dark ticket-status-badge">Chờ duyệt thanh toán</span>
+                                    <% } else { %>
+                                        <span class="badge ticket-status-badge <%= tkt.status === 'unused' ? 'bg-success' : 'bg-secondary' %>">
+                                            <%= tkt.status === 'unused' ? 'Chưa sử dụng' : 'Đã soát vé' %>
+                                        </span>
+                                    <% } %>
                                 </div>
 
                                 <div class="row align-items-center g-3 my-2">
                                     <div class="col-5 text-center">
-                                        <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm">
-                                            <img src="<%= tkt.qr_data %>" alt="QR Code Ticket" class="img-fluid" style="width: 140px; height: 140px;">
+                                        <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm position-relative">
+                                            <img src="<%= tkt.qr_data %>" alt="QR Code Ticket" class="img-fluid ticket-qr-img" style="width: 140px; height: 140px; transition: all 0.4s ease; <%= isPending || isCancelled ? 'filter: blur(4px); opacity: 0.45;' : '' %>">
+                                            <% if (isPending) { %>
+                                                <span class="badge bg-warning text-dark position-absolute top-50 start-50 translate-middle shadow-sm ticket-qr-lock-badge" style="font-size: 0.68rem;">
+                                                    <i class="fa-solid fa-lock me-1"></i> Chờ duyệt
+                                                </span>
+                                            <% } else if (isCancelled) { %>
+                                                <span class="badge bg-danger position-absolute top-50 start-50 translate-middle shadow-sm ticket-qr-lock-badge" style="font-size: 0.68rem;">
+                                                    Đã hủy
+                                                </span>
+                                            <% } %>
                                         </div>
-                                        <div class="small text-muted mt-1" style="font-size: 0.72rem;">Quét mã tại cửa rạp</div>
+                                        <div class="small text-muted mt-1 ticket-qr-hint" style="font-size: 0.72rem;">
+                                            <%= isPaid ? 'Quét mã tại cửa rạp' : (isPending ? 'Mở khóa khi Admin duyệt' : 'Vé không còn hiệu lực') %>
+                                        </div>
                                     </div>
                                     <div class="col-7">
                                         <div class="mb-2">
@@ -96,8 +185,14 @@
                                     </div>
                                 </div>
 
-                                <div class="border-top pt-2 mt-2 text-center text-muted small" style="font-size: 0.75rem;">
-                                    Xuất trình mã QR tại cửa phòng chiếu để nhân viên soát vé
+                                <div class="border-top pt-2 mt-2 text-center text-muted small ticket-footer-hint" style="font-size: 0.75rem;">
+                                    <% if (isPaid) { %>
+                                        Xuất trình mã QR tại cửa phòng chiếu để nhân viên soát vé
+                                    <% } else if (isPending) { %>
+                                        Mã QR sẽ tự động kích hoạt ngay khi Admin xác nhận đã nhận tiền
+                                    <% } else { %>
+                                        Đơn vé này đã bị hủy và không thể sử dụng
+                                    <% } %>
                                 </div>
                             </div>
                         </div>
@@ -138,5 +233,164 @@
         </div>
     </div>
 </div>
+
+<% if (isPending) { %>
+<script>
+(function initLiveTicketApprovalWatcher() {
+    const bookingCode = '<%= booking.booking_code %>';
+    const totalAmountStr = '<%= Number(booking.total_amount).toLocaleString("vi-VN") %>';
+    let finished = false;
+    let pollTimer = null;
+    let es = null;
+
+    function fmtNow(val) {
+        const d = val ? new Date(val) : new Date();
+        if (isNaN(d.getTime())) return '';
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+
+    function applyPaidState(info) {
+        if (finished) return;
+        finished = true;
+        if (pollTimer) clearInterval(pollTimer);
+        if (es) es.close();
+
+        const heroIcon = document.getElementById('statusHeroIcon');
+        if (heroIcon) {
+            heroIcon.className = 'rounded-circle bg-success text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm';
+            heroIcon.innerHTML = '<i class="fa-solid fa-check display-5"></i>';
+        }
+        const heroTitle = document.getElementById('statusHeroTitle');
+        if (heroTitle) {
+            heroTitle.className = 'text-dark fw-extrabold mb-1';
+            heroTitle.innerText = 'ĐẶT VÉ & THANH TOÁN THÀNH CÔNG!';
+        }
+        const heroSub = document.getElementById('statusHeroSubtitle');
+        if (heroSub) {
+            heroSub.innerText = 'Cảm ơn bạn đã lựa chọn CINESTAR CINEMA COMPLEX';
+        }
+
+        const pill = document.getElementById('liveWaitingPill');
+        if (pill) pill.remove();
+
+        const pendingBox = document.getElementById('pendingAlertBox');
+        if (pendingBox) pendingBox.remove();
+
+        const approvedBanner = document.getElementById('liveApprovedBanner');
+        if (approvedBanner) approvedBanner.classList.remove('d-none');
+
+        const payBadge = document.getElementById('paymentStatusBadge');
+        if (payBadge) {
+            payBadge.className = 'badge bg-success-subtle text-success border border-success-subtle';
+            payBadge.innerHTML = `<i class="fa-solid fa-circle-check me-1"></i> Đã thanh toán: ${totalAmountStr} đ`;
+        }
+
+        const confBadge = document.getElementById('confirmedAtBadge');
+        if (confBadge) {
+            confBadge.innerText = 'Duyệt lúc: ' + fmtNow(info && info.confirmed_at);
+            confBadge.classList.remove('d-none');
+        }
+
+        const printBtn = document.getElementById('printTicketBtn');
+        if (printBtn) printBtn.classList.remove('d-none');
+
+        document.querySelectorAll('.ticket-qr-img').forEach(img => {
+            img.style.filter = 'none';
+            img.style.opacity = '1';
+        });
+        document.querySelectorAll('.ticket-qr-lock-badge').forEach(b => b.remove());
+        document.querySelectorAll('.ticket-status-badge').forEach(b => {
+            b.className = 'badge ticket-status-badge bg-success';
+            b.innerText = 'Chưa sử dụng';
+        });
+        document.querySelectorAll('.ticket-qr-hint').forEach(el => {
+            el.innerText = 'Quét mã tại cửa rạp';
+        });
+        document.querySelectorAll('.ticket-footer-hint').forEach(el => {
+            el.innerText = 'Xuất trình mã QR tại cửa phòng chiếu để nhân viên soát vé';
+        });
+    }
+
+    function applyCancelledState(info) {
+        if (finished) return;
+        finished = true;
+        if (pollTimer) clearInterval(pollTimer);
+        if (es) es.close();
+
+        const heroIcon = document.getElementById('statusHeroIcon');
+        if (heroIcon) {
+            heroIcon.className = 'rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm';
+            heroIcon.innerHTML = '<i class="fa-solid fa-xmark display-5"></i>';
+        }
+        const heroTitle = document.getElementById('statusHeroTitle');
+        if (heroTitle) {
+            heroTitle.className = 'text-danger fw-extrabold mb-1';
+            heroTitle.innerText = 'ĐƠN HÀNG ĐÃ BỊ HỦY';
+        }
+        const heroSub = document.getElementById('statusHeroSubtitle');
+        if (heroSub) {
+            heroSub.innerText = (info && info.payment_note) || 'Đơn đặt vé đã bị hủy bởi quản trị viên.';
+        }
+        const pill = document.getElementById('liveWaitingPill');
+        if (pill) pill.remove();
+        const pendingBox = document.getElementById('pendingAlertBox');
+        if (pendingBox) pendingBox.remove();
+
+        const payBadge = document.getElementById('paymentStatusBadge');
+        if (payBadge) {
+            payBadge.className = 'badge bg-danger-subtle text-danger border border-danger-subtle';
+            payBadge.innerHTML = '<i class="fa-solid fa-circle-xmark me-1"></i> Đã hủy';
+        }
+        document.querySelectorAll('.ticket-status-badge').forEach(b => {
+            b.className = 'badge ticket-status-badge bg-danger';
+            b.innerText = 'Đã hủy';
+        });
+        document.querySelectorAll('.ticket-qr-lock-badge').forEach(b => {
+            b.className = 'badge bg-danger position-absolute top-50 start-50 translate-middle shadow-sm ticket-qr-lock-badge';
+            b.innerText = 'Đã hủy';
+        });
+        document.querySelectorAll('.ticket-qr-hint').forEach(el => {
+            el.innerText = 'Vé không còn hiệu lực';
+        });
+    }
+
+    function handleState(payload) {
+        if (!payload) return;
+        if (payload.booking_status === 'cancelled' || payload.payment_status === 'failed') {
+            applyCancelledState(payload);
+        } else if (payload.payment_status === 'paid') {
+            applyPaidState(payload);
+        }
+    }
+
+    async function checkStatusOnce() {
+        if (finished) return;
+        try {
+            const res = await fetch(`/booking/api/status/${encodeURIComponent(bookingCode)}`, { cache: 'no-store' });
+            if (!res.ok) return;
+            const data = await res.json();
+            if (data.success) handleState(data);
+        } catch (e) {}
+    }
+
+    // 1. Lắng nghe SSE thời gian thực (cập nhật ngay lập tức < 50ms khi Admin bấm Đã nhận tiền)
+    if (typeof EventSource !== 'undefined') {
+        es = new EventSource(`/booking/api/stream/${encodeURIComponent(bookingCode)}`);
+        es.onmessage = (evt) => {
+            try {
+                const payload = JSON.parse(evt.data);
+                if (payload && payload.type && payload.type !== 'connected') {
+                    handleState(payload);
+                }
+            } catch (e) {}
+        };
+    }
+
+    // 2. Fallback polling mỗi 3 giây phòng trường hợp SSE gián đoạn
+    pollTimer = setInterval(checkStatusOnce, 3000);
+})();
+</script>
+<% } %>
 
 <%- include('../layouts/footer') %>

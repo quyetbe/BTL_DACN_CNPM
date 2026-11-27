@@ -207,13 +207,15 @@
                 <div class="mb-3">
                     <label class="form-label text-secondary small fw-bold mb-1">Hình Thức Thanh Toán</label>
                     <select id="posPaymentMethod" class="form-select form-select-sm bg-white border text-dark fw-semibold mb-2 shadow-sm" style="color: #0f172a !important;" onchange="onPosPaymentMethodChange()">
-                        <option value="mbbank_qr" selected>QR MBBank (033320012005 - NGUYEN MANH QUYET)</option>
+                        <option value="mbbank_qr" selected>VietQR <%= (paymentSettings && paymentSettings.payment_bank_code) || 'MB' %> (<%= (paymentSettings && paymentSettings.payment_bank_account) || '033320012005' %>)</option>
                         <option value="cash">Tiền mặt tại quầy</option>
                         <option value="card">Quẹt thẻ ngân hàng (POS)</option>
                         <option value="vnpay">Cổng VNPAY</option>
+                        <option value="momo">Ví Điện Tử MoMo</option>
+                        <option value="zalopay">Ví Điện Tử ZaloPay</option>
                     </select>
                     <button type="button" class="btn btn-outline-danger btn-sm w-100 fw-bold shadow-sm" id="btnShowPosQr" onclick="showPosQrModal()">
-                        <i class="fa-solid fa-qrcode me-1"></i> Hiển thị QR MBBank cho khách
+                        <i class="fa-solid fa-qrcode me-1"></i> Hiển thị mã QR VietQR cho khách
                     </button>
                 </div>
 
@@ -286,11 +288,11 @@
             </div>
             <div class="modal-body text-center py-4">
                 <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm mb-3">
-                    <img id="posQrImg" src="https://img.vietqr.io/image/MB-033320012005-compact2.png?amount=0&addInfo=POS%20VE&accountName=NGUYEN%20MANH%20QUYET" alt="QR MBBank" class="img-fluid rounded" style="max-width: 240px;">
+                    <img id="posQrImg" src="https://img.vietqr.io/image/<%= encodeURIComponent((paymentSettings && paymentSettings.payment_bank_code) || 'MB') %>-<%= encodeURIComponent((paymentSettings && paymentSettings.payment_bank_account) || '033320012005') %>-compact2.png?amount=0&addInfo=POS%20VE&accountName=<%= encodeURIComponent((paymentSettings && paymentSettings.payment_bank_owner) || 'NGUYEN MANH QUYET') %>" alt="QR Ngân hàng" class="img-fluid rounded" style="max-width: 240px;">
                 </div>
-                <div class="text-dark fw-bold fs-5 mb-1">NGUYEN MANH QUYET</div>
-                <div class="text-primary fw-bold font-monospace fs-5 mb-2">033320012005</div>
-                <div class="text-muted small mb-3">Ngân hàng TMCP Quân đội (MB)</div>
+                <div class="text-dark fw-bold fs-5 mb-1"><%= (paymentSettings && paymentSettings.payment_bank_owner) || 'NGUYEN MANH QUYET' %></div>
+                <div class="text-primary fw-bold font-monospace fs-5 mb-2"><%= (paymentSettings && paymentSettings.payment_bank_account) || '033320012005' %></div>
+                <div class="text-muted small mb-3"><%= (paymentSettings && paymentSettings.payment_bank_name) || 'Ngân hàng TMCP Quân đội (MB)' %></div>
                 <div class="p-2 bg-light rounded border d-inline-block px-4 mb-3">
                     <span class="text-muted small me-2">Số tiền cần thu:</span>
                     <span class="fs-4 fw-extrabold text-danger" id="posQrAmount">0 đ</span>
@@ -577,7 +579,10 @@ function showPosQrModal() {
         const qty = parseInt(inp.value) || 0;
         if (qty > 0) grand += qty * Number(inp.dataset.price);
     });
-    const qrUrl = `https://img.vietqr.io/image/MB-033320012005-compact2.png?amount=${grand}&addInfo=POS%20VE&accountName=NGUYEN%20MANH%20QUYET`;
+    const bankCode = encodeURIComponent('<%= (paymentSettings && paymentSettings.payment_bank_code) || "MB" %>');
+    const bankAccount = encodeURIComponent('<%= (paymentSettings && paymentSettings.payment_bank_account) || "033320012005" %>');
+    const bankOwner = encodeURIComponent('<%= (paymentSettings && paymentSettings.payment_bank_owner) || "NGUYEN MANH QUYET" %>');
+    const qrUrl = `https://img.vietqr.io/image/${bankCode}-${bankAccount}-compact2.png?amount=${grand}&addInfo=POS%20VE&accountName=${bankOwner}`;
     document.getElementById('posQrImg').src = qrUrl;
     document.getElementById('posQrAmount').innerText = grand.toLocaleString('vi-VN') + ' đ';
     const m = bootstrap.Modal.getOrCreateInstance(document.getElementById('posQrModal'));

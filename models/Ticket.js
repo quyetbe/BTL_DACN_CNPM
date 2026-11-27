@@ -76,6 +76,15 @@ class Ticket {
             };
         }
 
+        if (ticket.payment_status && ticket.payment_status !== 'paid') {
+            return {
+                success: false,
+                status: 'unpaid',
+                message: `CẢNH BÁO: Đơn hàng ${ticket.booking_code} CHƯA ĐƯỢC DUYỆT THANH TOÁN (trạng thái: Chờ xác nhận tiền)! Vui lòng liên hệ quản trị viên duyệt thanh toán trước khi vào rạp.`,
+                ticket
+            };
+        }
+
         // Xử lý đơn hàng có nhiều vé (soát theo mã đơn hàng BKG-...)
         if (ticket.all_tickets && ticket.all_tickets.length > 0) {
             const unusedTickets = ticket.all_tickets.filter(t => t.status === 'unused');

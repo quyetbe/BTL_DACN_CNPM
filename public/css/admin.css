@@ -166,12 +166,58 @@ body.admin-body {
     color: #0f172a !important;
 }
 
+/* Giữ chữ trắng sắc nét trên các badge, nút và khối nền đậm */
+.admin-body .badge.text-white,
+.admin-body .badge.bg-primary,
+.admin-body .badge.bg-danger,
+.admin-body .badge.bg-success,
+.admin-body .badge.bg-secondary,
+.admin-body .btn.text-white,
+.admin-body .btn-danger,
+.admin-body .btn-primary,
+.admin-body .btn-success,
+.admin-body .btn-dark,
+.admin-body .bg-danger.text-white,
+.admin-body .bg-primary.text-white,
+.admin-body .bg-success.text-white,
+.admin-body .sidebar-nav .nav-link.active,
+.admin-body .sidebar-nav .nav-link.active span,
+.admin-body .sidebar-nav .nav-link.active i {
+    color: #ffffff !important;
+}
+
+.admin-body .text-light {
+    color: #334155 !important;
+}
+
 .admin-body .text-secondary {
-    color: #64748b !important;
+    color: #475569 !important;
 }
 
 .admin-body .border-secondary {
     border-color: #e2e8f0 !important;
+}
+
+/* Thẻ cấu hình thanh toán chuẩn giao diện sáng */
+.admin-body .payment-config-card {
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-body .payment-config-card:hover {
+    border-color: #cbd5e1 !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.admin-body .payment-config-card .form-label {
+    color: #334155 !important;
+    font-weight: 600;
+}
+
+.admin-body .payment-config-card .form-text {
+    color: #64748b !important;
 }
 
 /* Tables in Admin */

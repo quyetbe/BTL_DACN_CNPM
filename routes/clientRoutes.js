@@ -21,9 +21,13 @@ router.post('/booking/save-combos/:showtimeId', requireLogin, BookingController.
 router.get('/booking/checkout/:showtimeId', requireLogin, BookingController.checkout);
 router.post('/booking/process-payment', requireLogin, BookingController.processPayment);
 router.get('/booking/success/:bookingCode', BookingController.ticketSuccess);
+router.get('/booking/api/status/:bookingCode', BookingController.apiBookingStatus);
+router.get('/booking/api/stream/:bookingCode', BookingController.apiBookingStream);
 
 // Lịch sử vé & hồ sơ
 router.get('/my-tickets', requireLogin, BookingController.myTickets);
+router.get('/booking/api/my-tickets-status', requireLogin, BookingController.apiMyTicketsStatus);
+router.get('/booking/api/my-tickets-stream', requireLogin, BookingController.apiMyTicketsStream);
 router.get('/profile', requireLogin, AuthController.showProfile);
 router.post('/profile', requireLogin, AuthController.updateProfile);
 router.post('/change-password', requireLogin, AuthController.changePassword);

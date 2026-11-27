@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const ManagerController = require('../controllers/ManagerController');
+const AdminController = require('../controllers/AdminController');
 const { requireRole } = require('../middlewares/authMiddleware');
 const upload = require('../middlewares/uploadMiddleware');
 
@@ -41,5 +42,8 @@ router.post('/combos/delete/:id', ManagerController.deleteCombo);
 
 // Báo cáo doanh thu & tỷ lệ lấp đầy
 router.get('/reports', ManagerController.reports);
+
+// Duyệt đơn thanh toán cho Manager
+router.get('/approvals', AdminController.approvals);
 
 module.exports = router;

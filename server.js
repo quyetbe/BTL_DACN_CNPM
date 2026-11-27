@@ -20,7 +20,8 @@ const managerRoutes = require('./routes/managerRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = Number(process.env.PORT || 3000);
+const ADMIN_PORT = Number(process.env.ADMIN_PORT || 3001);
 const isProd = process.env.NODE_ENV === 'production';
 
 // Tắt header công nghệ Express (Chống footprinting)
@@ -120,8 +121,26 @@ app.use((req, res, next) => {
     next();
 });
 
-// Global Authentication Middleware
+// Global Authentication Middleware (Tách phiên song song Client & Admin/Manager)
 app.use(checkAuth);
+
+// Điều hướng tự động cho Cổng Quản Trị song song (http://localhost:3001)
+app.get('/', (req, res, next) => {
+    if (req.socket && req.socket.localPort === ADMIN_PORT) {
+        const adminUser = req.session && req.session.adminUser;
+        if (!adminUser) {
+            return res.redirect('/auth/login?portal=admin');
+        }
+        if (adminUser.role_name === 'admin') return res.redirect('/admin/approvals');
+        if (adminUser.role_name === 'manager') return res.redirect('/manager/dashboard');
+        return res.redirect('/staff/pos');
+    }
+    return next();
+});
+
+// Đường dẫn đăng nhập nhanh cổng quản trị
+app.get('/admin/login', (req, res) => res.redirect('/auth/login?portal=admin'));
+app.get('/manager/login', (req, res) => res.redirect('/auth/login?portal=admin'));
 
 // Đăng ký các Routes theo phân hệ
 app.use('/auth', authRoutes);
@@ -149,7 +168,7 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Khởi động Web Server
+// Khởi động song song 2 giao diện: Khách hàng (:3000) & Quản trị Admin/Manager (:3001)
 app.listen(PORT, () => {
     console.log('====================================================================');
     console.log('🎬 CINESTAR CINEMA - HỆ THỐNG ĐẶT VÉ VÀ QUẢN LÝ SUẤT CHIẾU');
@@ -158,8 +177,9 @@ app.listen(PORT, () => {
     console.log('   1. Nguyễn Mạnh Quyết (MSV: 20231053) - Phân hệ Manager & Admin');
     console.log('   2. Hà Thái Bảo      (MSV: 20231045) - Phân hệ Client & Staff');
     console.log('--------------------------------------------------------------------');
-    console.log(`🚀 Web Application đang chạy tại: http://localhost:${PORT}`);
-    console.log(`🛡️  Bảo mật: Helmet Enabled | Rate Limiting Enabled | Strict Session`);
+    console.log(`🌐 Giao diện KHÁCH HÀNG (Client)       : http://localhost:${PORT}`);
+    console.log(`🛡️  Giao diện QUẢN TRỊ (Admin/Manager)  : http://localhost:${ADMIN_PORT}`);
+    console.log(`🔒 Bảo mật: Helmet | Rate Limiting | Khóa tài khoản sai 5 lần | Phiên song song`);
     console.log('--------------------------------------------------------------------');
     console.log('🔑 TÀI KHOẢN MẪU ĐĂNG NHẬP (4 VAI TRÒ):');
     console.log('   - Quản trị viên (Admin)   : admin@cinema.com   / pass: admin123');
@@ -168,3 +188,12 @@ app.listen(PORT, () => {
     console.log('   - Khách hàng (Client)     : client@cinema.com  / pass: client123');
     console.log('====================================================================');
 });
+
+if (ADMIN_PORT !== PORT) {
+    const adminServer = app.listen(ADMIN_PORT, () => {
+        console.log(`✅ Cổng Quản trị song song (Admin / Manager) đang chạy tại: http://localhost:${ADMIN_PORT}`);
+    });
+    adminServer.on('error', (err) => {
+        console.error(`⚠️ Không thể mở cổng Admin song song ${ADMIN_PORT}:`, err.message);
+    });
+}

@@ -56,6 +56,7 @@
                     <th>SUẤT CHIẾU</th>
                     <th>SỐ VÉ</th>
                     <th>HÌNH THỨC</th>
+                    <th>TRẠNG THÁI</th>
                     <th>TỔNG TIỀN</th>
                     <th>THỜI GIAN</th>
                 </tr>
@@ -75,15 +76,24 @@
                             <td><span class="badge bg-secondary"><%= b.ticket_count %> vé</span></td>
                             <td>
                                 <span class="badge <%= b.booking_type === 'pos' ? 'bg-warning text-dark' : 'bg-primary' %>">
-                                    <%= b.booking_type.toUpperCase() %> (<%= b.payment_method %>)
+                                    <%= b.booking_type.toUpperCase() %> (<%= formatPaymentMethod(b.payment_method) %>)
                                 </span>
+                            </td>
+                            <td>
+                                <% if (b.booking_status === 'cancelled' || b.payment_status === 'failed') { %>
+                                    <span class="badge bg-danger">Đã hủy</span>
+                                <% } else if (b.payment_status === 'paid') { %>
+                                    <span class="badge bg-success">Đã thanh toán</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark">Chờ xác nhận</span>
+                                <% } %>
                             </td>
                             <td class="text-warning fw-bold"><%= Number(b.total_amount).toLocaleString('vi-VN') %> đ</td>
                             <td class="text-secondary"><%= formatDateTime(b.created_at) %></td>
                         </tr>
                     <% }) %>
                 <% } else { %>
-                    <tr><td colspan="9" class="text-center text-secondary py-4">Chưa có dữ liệu giao dịch</td></tr>
+                    <tr><td colspan="10" class="text-center text-secondary py-4">Chưa có dữ liệu giao dịch</td></tr>
                 <% } %>
             </tbody>
         </table>

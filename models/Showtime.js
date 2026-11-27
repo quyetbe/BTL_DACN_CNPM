@@ -48,7 +48,7 @@ class Showtime {
         `, [id]);
     }
 
-    static async getByMovie(movieId, filterDate = null) {
+    static async getByMovie(movieId, filterDate = null, cinemaId = null) {
         let sql = `
             SELECT st.*, 
                    r.room_name, r.screen_type, r.cinema_id,
@@ -64,6 +64,11 @@ class Showtime {
         `;
         const params = [movieId];
 
+        if (cinemaId) {
+            sql += ` AND r.cinema_id = ?`;
+            params.push(Number(cinemaId));
+        }
+
         if (filterDate) {
             sql += ` AND DATE(st.start_time) = DATE(?)`;
             params.push(filterDate);
@@ -76,8 +81,8 @@ class Showtime {
         return await query(sql, params);
     }
 
-    static async getByDate(dateStr) {
-        return await query(`
+    static async getByDate(dateStr, cinemaId = null) {
+        let sql = `
             SELECT st.*, 
                    m.title as movie_title, m.poster_url, m.duration, m.age_rating,
                    r.room_name, r.screen_type, r.cinema_id,
@@ -87,8 +92,14 @@ class Showtime {
             JOIN rooms r ON st.room_id = r.id
             LEFT JOIN cinemas c ON r.cinema_id = c.id
             WHERE DATE(st.start_time) = DATE(?) AND st.status = 'scheduled'
-            ORDER BY st.start_time ASC
-        `, [dateStr]);
+        `;
+        const params = [dateStr];
+        if (cinemaId) {
+            sql += ` AND r.cinema_id = ?`;
+            params.push(Number(cinemaId));
+        }
+        sql += ` ORDER BY st.start_time ASC`;
+        return await query(sql, params);
     }
 
     static async create({ movie_id, room_id, start_time, end_time, buffer_minutes = 15, base_price = 80000 }) {

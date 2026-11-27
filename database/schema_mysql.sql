@@ -26,6 +26,8 @@ CREATE TABLE IF NOT EXISTS users (
     password_hash VARCHAR(255) NOT NULL,
     avatar VARCHAR(255) DEFAULT '/images/default-avatar.png',
     status ENUM('active', 'locked') DEFAULT 'active',
+    failed_login_attempts INT NOT NULL DEFAULT 0,
+    locked_at DATETIME NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -113,14 +115,18 @@ CREATE TABLE IF NOT EXISTS bookings (
     total_amount INT NOT NULL,
     discount_amount INT DEFAULT 0,
     payment_method VARCHAR(50) DEFAULT 'mbbank_qr',
-    payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'paid',
-    booking_status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'confirmed',
+    payment_status ENUM('pending', 'paid', 'failed', 'refunded') DEFAULT 'pending',
+    booking_status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending',
     booking_type ENUM('online', 'pos') DEFAULT 'online',
+    payment_note VARCHAR(255) NULL,
+    confirmed_by INT NULL,
+    confirmed_at DATETIME NULL,
     created_by INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (showtime_id) REFERENCES showtimes(id) ON DELETE RESTRICT,
-    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+    FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
+    FOREIGN KEY (confirmed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 9. BẢNG VÉ XEM PHIM CHI TIẾT (TICKETS)

@@ -30,10 +30,10 @@
                         <tr class="border-bottom border-secondary border-opacity-25">
                             <td>
                                 <div class="d-flex align-items-center gap-2">
-                                    <div class="rounded-circle bg-dark border border-secondary text-white d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">
+                                    <div class="rounded-circle bg-danger-subtle border border-danger-subtle text-danger d-flex align-items-center justify-content-center fw-bold" style="width: 34px; height: 34px;">
                                         <%= u.full_name ? u.full_name.charAt(0).toUpperCase() : 'U' %>
                                     </div>
-                                    <strong class="text-white"><%= u.full_name %></strong>
+                                    <strong class="text-dark"><%= u.full_name %></strong>
                                 </div>
                             </td>
                             <td><code><%= u.email %></code></td>
@@ -53,6 +53,16 @@
                                 <span class="badge <%= u.status === 'active' ? 'bg-success' : 'bg-danger' %>">
                                     <%= u.status === 'active' ? 'Hoạt động' : 'Đã khóa' %>
                                 </span>
+                                <% if (Number(u.failed_login_attempts || 0) > 0) { %>
+                                    <div class="mt-1">
+                                        <span class="badge <%= u.status === 'locked' ? 'bg-warning text-dark' : 'bg-secondary' %>" style="font-size: 0.7rem;">
+                                            <i class="fa-solid fa-shield-exclamation me-1"></i> Sai MK: <%= u.failed_login_attempts %> lần
+                                        </span>
+                                    </div>
+                                <% } %>
+                                <% if (u.status === 'locked' && u.locked_at) { %>
+                                    <div class="text-secondary mt-1" style="font-size: 0.68rem;">Khóa lúc: <%= formatDateTime(u.locked_at) %></div>
+                                <% } %>
                             </td>
                             <td class="small text-secondary"><%= u.created_at %></td>
                             <td class="text-end">

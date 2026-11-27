@@ -19,6 +19,47 @@ const pool = mysql.createPool({
 });
 
 // Tự động kiểm tra và khởi tạo bảng MySQL nếu chưa có
+async function ensureColumn(tableName, columnName, columnDef) {
+    const [cols] = await pool.query(
+        `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?`,
+        [tableName, columnName]
+    );
+    if (cols.length === 0) {
+        await pool.query(`ALTER TABLE \`${tableName}\` ADD COLUMN ${columnDef}`);
+        console.log(`✅ Đã tự động thêm cột ${tableName}.${columnName}`);
+    }
+}
+
+async function seedDefaultPaymentSettings() {
+    const defaults = [
+        ['payment_mbbank_enabled', '1', 'Bật thanh toán chuyển khoản VietQR Ngân hàng'],
+        ['payment_bank_code', 'MB', 'Mã ngân hàng nhận VietQR (VD: MB, VCB, TCB, BIDV, ACB)'],
+        ['payment_bank_name', 'Ngân hàng TMCP Quân đội (MBBank)', 'Tên đầy đủ ngân hàng nhận tiền'],
+        ['payment_bank_account', '033320012005', 'Số tài khoản ngân hàng nhận tiền'],
+        ['payment_bank_owner', 'NGUYEN MANH QUYET', 'Chủ tài khoản ngân hàng'],
+        ['payment_vnpay_enabled', '1', 'Bật cổng thanh toán VNPAY'],
+        ['payment_vnpay_tmn', 'CINESTARVN01', 'Mã Terminal VNPAY (TMN Code)'],
+        ['payment_momo_enabled', '1', 'Bật ví điện tử MoMo'],
+        ['payment_momo_phone', '033320012005', 'Số điện thoại ví MoMo nhận tiền'],
+        ['payment_momo_owner', 'NGUYEN MANH QUYET', 'Tên chủ ví MoMo'],
+        ['payment_zalopay_enabled', '1', 'Bật ví điện tử ZaloPay'],
+        ['payment_zalopay_phone', '033320012005', 'Số điện thoại ví ZaloPay nhận tiền'],
+        ['payment_zalopay_owner', 'NGUYEN MANH QUYET', 'Tên chủ ví ZaloPay'],
+        ['payment_card_enabled', '1', 'Bật thanh toán thẻ ATM / Visa / MasterCard'],
+        ['payment_cash_enabled', '1', 'Bật thanh toán tiền mặt tại quầy'],
+        ['payment_cash_note', 'Vui lòng đến quầy vé trước giờ chiếu ít nhất 15 phút và xuất trình mã đơn để thanh toán tiền mặt và kích hoạt vé.', 'Hướng dẫn thanh toán tiền mặt tại quầy'],
+        ['max_login_attempts', '5', 'Số lần nhập sai mật khẩu tối đa trước khi tự động khóa tài khoản']
+    ];
+
+    for (const [key, value, description] of defaults) {
+        await pool.query(
+            'INSERT IGNORE INTO system_settings (`key`, value, description) VALUES (?, ?, ?)',
+            [key, value, description]
+        );
+    }
+}
+
 async function initDatabase() {
     try {
         const [tables] = await pool.query("SHOW TABLES LIKE 'movies'");
@@ -31,15 +72,25 @@ async function initDatabase() {
                 console.log('✅ Khởi tạo cấu trúc bảng MySQL cinema_db thành công!');
             }
         }
+
+        // Migration an toàn cho khóa tài khoản sai mật khẩu & duyệt thanh toán đơn hàng
+        await ensureColumn('users', 'failed_login_attempts', 'failed_login_attempts INT NOT NULL DEFAULT 0');
+        await ensureColumn('users', 'locked_at', 'locked_at DATETIME NULL');
+        await ensureColumn('bookings', 'confirmed_by', 'confirmed_by INT NULL');
+        await ensureColumn('bookings', 'confirmed_at', 'confirmed_at DATETIME NULL');
+        await ensureColumn('bookings', 'payment_note', 'payment_note VARCHAR(255) NULL');
+
+        await seedDefaultPaymentSettings();
     } catch (err) {
         console.error('⚠️ Lỗi kiểm tra / khởi tạo CSDL MySQL:', err.message);
     }
 }
 
-initDatabase();
+const initReady = initDatabase();
 
 module.exports = {
     pool,
+    initReady,
     // Helper lấy danh sách nhiều bản ghi
     async query(sql, params = []) {
         const [rows] = await pool.query(sql, params);

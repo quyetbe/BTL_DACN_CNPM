@@ -447,6 +447,16 @@
         const isRestrictedPath = path.startsWith('/staff') || path.startsWith('/admin') || path.startsWith('/manager') || path.startsWith('/auth');
 
         if (savedId && savedName) {
+            // Đảm bảo session cookie luôn đồng bộ với cơ sở đã chọn trong sessionStorage
+            const cookieMatch = document.cookie.match(/(?:^|;\s*)selectedCinemaId=([^;]+)/);
+            const currentCookieId = cookieMatch ? cookieMatch[1] : null;
+            if (String(currentCookieId) !== String(savedId)) {
+                document.cookie = "selectedCinemaId=" + savedId + "; path=/;";
+                if (!isRestrictedPath) {
+                    window.location.reload();
+                    return;
+                }
+            }
             // Đã chọn rạp trong phiên duyệt web hiện tại -> cập nhật hiển thị
             updateCinemaUI(savedId, savedName, savedCity || 'Hà Nội');
         } else if (!dismissed && !isRestrictedPath && path === '/') {

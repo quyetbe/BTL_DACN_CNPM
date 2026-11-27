@@ -63,6 +63,15 @@
                     </a>
                 </li>
                 <li>
+                    <a class="nav-link d-flex align-items-center justify-content-between <%= typeof currentPath !== 'undefined' && (currentPath.includes('/admin/approvals') || currentPath.includes('/manager/approvals')) ? 'active' : '' %>" href="<%= (currentUser && currentUser.role_name === 'manager') ? '/manager/approvals' : '/admin/approvals' %>">
+                        <span>
+                            <i class="fa-solid fa-clipboard-check"></i>
+                            <span>Duyệt Đơn Thanh Toán</span>
+                        </span>
+                        <span id="sidebarPendingBadge" class="badge bg-warning text-dark rounded-pill fw-bold <%= (typeof pendingBookingsCount !== 'undefined' && pendingBookingsCount > 0) ? '' : 'd-none' %>"><%= typeof pendingBookingsCount !== 'undefined' ? pendingBookingsCount : 0 %></span>
+                    </a>
+                </li>
+                <li>
                     <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath.includes('/manager/reports') ? 'active' : '' %>" href="/manager/reports">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                         <span>Báo Cáo Doanh Thu</span>
@@ -81,7 +90,7 @@
                     <li>
                         <a class="nav-link <%= typeof currentPath !== 'undefined' && currentPath.includes('/admin/settings') ? 'active' : '' %>" href="/admin/settings">
                             <i class="fa-solid fa-sliders"></i>
-                            <span>Cấu Hình Rạp</span>
+                            <span>Cấu Hình Rạp & TT</span>
                         </a>
                     </li>
                     <li>
@@ -92,8 +101,8 @@
                     </li>
                 <% } %>
 
-                <!-- Phím tắt nhanh đến POS / Soát vé / Client -->
-                <li class="px-3 pt-3 pb-1 text-uppercase text-secondary fw-bold" style="font-size: 0.72rem;">Phím Tắt</li>
+                <!-- Phím tắt nhanh đến POS / Soát vé / Client song song -->
+                <li class="px-3 pt-3 pb-1 text-uppercase text-secondary fw-bold" style="font-size: 0.72rem;">Phím Tắt Song Song</li>
                 <li>
                     <a class="nav-link" href="/staff/pos">
                         <i class="fa-solid fa-cash-register text-warning"></i>
@@ -107,9 +116,9 @@
                     </a>
                 </li>
                 <li>
-                    <a class="nav-link" href="/" target="_blank">
+                    <a class="nav-link" href="http://localhost:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>" target="_blank">
                         <i class="fa-solid fa-arrow-up-right-from-square text-success"></i>
-                        <span>Xem Trang Khách Hàng</span>
+                        <span>Trang Khách Hàng (:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>)</span>
                     </a>
                 </li>
             </ul>
@@ -119,10 +128,10 @@
                     <%= currentUser && currentUser.full_name ? currentUser.full_name.charAt(0).toUpperCase() : 'U' %>
                 </div>
                 <div class="overflow-hidden me-auto">
-                    <div class="small fw-bold text-truncate"><%= currentUser ? currentUser.full_name : 'Quản Lý' %></div>
-                    <div style="font-size: 0.72rem; color: #9ca3af;"><%= currentUser ? currentUser.role_display : 'Manager' %></div>
+                    <div class="small fw-bold text-truncate text-dark"><%= currentUser ? currentUser.full_name : 'Quản Lý' %></div>
+                    <div style="font-size: 0.72rem; color: #64748b;"><%= currentUser ? currentUser.role_display : 'Manager' %></div>
                 </div>
-                <a href="/auth/logout" class="text-danger fs-5" title="Đăng xuất">
+                <a href="/auth/logout?portal=admin" class="text-danger fs-5" title="Đăng xuất cổng Quản trị">
                     <i class="fa-solid fa-arrow-right-from-bracket"></i>
                 </a>
             </div>
@@ -136,13 +145,17 @@
                     <button type="button" class="btn btn-outline-danger btn-sm d-lg-none" id="btnSidebarToggle" onclick="toggleAdminSidebar()" title="Mở danh mục menu">
                         <i class="fa-solid fa-bars fs-6"></i>
                     </button>
-                    <h5 class="mb-0 text-dark fw-bold fs-6 fs-md-5 text-truncate" style="max-width: 320px;"><%= typeof title !== 'undefined' ? title : 'Quản Lý Rạp Chiếu Phim' %></h5>
+                    <h5 class="mb-0 text-dark fw-bold fs-6 fs-md-5 text-truncate" style="max-width: 340px;"><%= typeof title !== 'undefined' ? title : 'Quản Lý Rạp Chiếu Phim' %></h5>
                 </div>
                 <div class="d-flex align-items-center gap-2 gap-md-3">
-                    <span class="badge bg-dark border border-secondary px-2 px-md-3 py-2 text-warning d-none d-sm-inline">
-                        <i class="fa-solid fa-calendar-day me-1"></i> Hôm nay: <%= new Date().toLocaleDateString('vi-VN') %>
+                    <a href="http://localhost:<%= typeof clientPort !== 'undefined' ? clientPort : 3000 %>" target="_blank" class="btn btn-outline-success btn-sm rounded-pill fw-semibold d-none d-md-inline-flex align-items-center gap-1">
+                        <i class="fa-solid fa-window-restore"></i>
+                        <span>Mở Trang Khách Hàng</span>
+                    </a>
+                    <span class="badge bg-dark border px-2 px-md-3 py-2 d-none d-sm-inline">
+                        <i class="fa-solid fa-calendar-day text-danger me-1"></i> Hôm nay: <%= new Date().toLocaleDateString('vi-VN') %>
                     </span>
-                    <a href="/auth/logout" class="btn btn-outline-danger btn-sm">
+                    <a href="/auth/logout?portal=admin" class="btn btn-outline-danger btn-sm">
                         <i class="fa-solid fa-power-off me-1"></i> <span class="d-none d-sm-inline">Đăng Xuất</span>
                     </a>
                 </div>

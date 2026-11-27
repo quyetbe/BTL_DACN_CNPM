@@ -32,7 +32,9 @@
             <div class="d-flex align-items-center gap-3">
                 <a href="/pricing"><i class="fa-solid fa-ticket-simple me-1 text-warning"></i> Ưu Đãi Thành Viên</a>
                 <span class="text-secondary">|</span>
-                <a href="/about"><i class="fa-solid fa-graduation-cap me-1 text-info"></i> Đề Tài ĐACN Nhóm 11</a>
+                <a href="http://localhost:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>" target="_blank" class="text-danger fw-bold">
+                    <i class="fa-solid fa-shield-halved me-1"></i> Cổng Admin / Manager (:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>)
+                </a>
             </div>
         </div>
     </div>
@@ -105,14 +107,14 @@
                         <% } %>
 
                         <% if (currentUser.role_name === 'manager' || currentUser.role_name === 'admin') { %>
-                            <a href="/manager/dashboard" class="btn btn-outline-primary btn-sm me-2 fw-bold shadow-sm">
+                            <a href="http://localhost:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>/manager/dashboard" target="_blank" class="btn btn-outline-primary btn-sm me-2 fw-bold shadow-sm">
                                 <i class="fa-solid fa-chart-pie me-1"></i> Quản Lý
                             </a>
                         <% } %>
 
                         <% if (currentUser.role_name === 'admin') { %>
-                            <a href="/admin/users" class="btn btn-outline-danger btn-sm me-2 fw-bold shadow-sm">
-                                <i class="fa-solid fa-shield-halved me-1"></i> Quản Trị
+                            <a href="http://localhost:<%= typeof adminPort !== 'undefined' ? adminPort : 3001 %>/admin/approvals" target="_blank" class="btn btn-outline-danger btn-sm me-2 fw-bold shadow-sm">
+                                <i class="fa-solid fa-clipboard-check me-1"></i> Duyệt Đơn
                             </a>
                         <% } %>
 
@@ -142,7 +144,7 @@
                                 </li>
                                 <li><hr class="dropdown-divider my-1"></li>
                                 <li>
-                                    <a class="dropdown-item py-2 text-danger fw-semibold" href="/auth/logout">
+                                    <a class="dropdown-item py-2 text-danger fw-semibold" href="/auth/logout?portal=client">
                                         <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
                                     </a>
                                 </li>

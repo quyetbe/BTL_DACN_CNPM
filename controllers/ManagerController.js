@@ -17,8 +17,10 @@ class ManagerController {
             const totalMovies = allMovies.length;
             const totalRooms = allRooms.length;
 
-            // Suất chiếu hôm nay
-            const todayStr = new Date().toISOString().split('T')[0];
+            // Suất chiếu hôm nay (lấy giờ địa phương và giới hạn 25 suất hiển thị gọn trên Dashboard)
+            const nowLocal = new Date();
+            const pad = (n) => String(n).padStart(2, '0');
+            const todayStr = `${nowLocal.getFullYear()}-${pad(nowLocal.getMonth() + 1)}-${pad(nowLocal.getDate())}`;
             const todayShowtimes = await query(`
                 SELECT st.*, m.title as movie_title, r.room_name,
                        (SELECT COUNT(*) FROM tickets t JOIN bookings b ON t.booking_id = b.id WHERE t.showtime_id = st.id AND b.booking_status != 'cancelled') as sold_seats,
@@ -28,6 +30,7 @@ class ManagerController {
                 JOIN rooms r ON st.room_id = r.id
                 WHERE DATE(st.start_time) = DATE(?) AND st.status = 'scheduled'
                 ORDER BY st.start_time ASC
+                LIMIT 25
             `, [todayStr]);
 
             res.render('manager/dashboard', {
@@ -36,7 +39,7 @@ class ManagerController {
                 totalMovies,
                 totalRooms,
                 todayShowtimes,
-                managerUser: req.session.user
+                managerUser: req.currentUser || req.session.adminUser || req.session.user
             });
         } catch (err) {
             console.error('Lỗi manager dashboard:', err);

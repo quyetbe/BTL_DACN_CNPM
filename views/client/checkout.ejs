@@ -1,7 +1,42 @@
 <%- include('../layouts/header') %>
 
+<%
+    const _paymentSettings = (locals.paymentSettings && typeof locals.paymentSettings === 'object') ? locals.paymentSettings : {
+        payment_bank_code: 'MB',
+        payment_bank_name: 'Ngân hàng TMCP Quân đội (MBBank)',
+        payment_bank_account: '033320012005',
+        payment_bank_owner: 'NGUYEN MANH QUYET',
+        payment_vnpay_tmn: 'CINESTARVN01',
+        payment_momo_phone: '033320012005',
+        payment_momo_owner: 'NGUYEN MANH QUYET',
+        payment_zalopay_phone: '033320012005',
+        payment_zalopay_owner: 'NGUYEN MANH QUYET',
+        payment_cash_note: 'Vui lòng đến quầy vé trước giờ chiếu ít nhất 15 phút để thanh toán tiền mặt và kích hoạt vé.'
+    };
+    const _paymentMethods = (Array.isArray(locals.paymentMethods) && locals.paymentMethods.length > 0) ? locals.paymentMethods : [
+        { id: 'mbbank_qr', title: 'Chuyển Khoản Mã QR Ngân Hàng (VietQR 24/7)', subtitle: 'STK: ' + _paymentSettings.payment_bank_account + ' • ' + _paymentSettings.payment_bank_owner },
+        { id: 'vnpay', title: 'Cổng Thanh Toán VNPAY-QR / ATM Nội Địa', subtitle: 'Hỗ trợ 40+ ngân hàng nội địa' },
+        { id: 'momo', title: 'Ví Điện Tử MoMo', subtitle: 'SĐT: ' + _paymentSettings.payment_momo_phone },
+        { id: 'zalopay', title: 'Ví Điện Tử ZaloPay', subtitle: 'SĐT: ' + _paymentSettings.payment_zalopay_phone },
+        { id: 'card', title: 'Thẻ Quốc Tế / ATM (Visa, MasterCard, JCB)', subtitle: 'Xác thực 3D-Secure' },
+        { id: 'cash', title: 'Thanh Toán Tiền Mặt Tại Quầy Vé', subtitle: 'Giữ ghế trực tuyến và thanh toán tại rạp' }
+    ];
+    const _transferMemo = locals.transferMemo || ('DATVE ' + showtime.id + (currentUser && currentUser.phone ? ' ' + currentUser.phone : ''));
+    const _paymentQrs = locals.paymentQrs || { vnpay: '', momo: '', zalopay: '' };
+    locals.paymentSettings = _paymentSettings;
+    locals.paymentMethods = _paymentMethods;
+    locals.transferMemo = _transferMemo;
+    locals.paymentQrs = _paymentQrs;
+%>
+
 <div class="container py-4 mb-5">
-    <!-- Countdown Timer Banner (Khóa Giữ Ghế Tạm Thời 5 Phút - Light Style) -->
+    <% if (typeof error !== 'undefined' && error) { %>
+        <div class="alert alert-danger rounded-4 shadow-sm mb-3">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> <%= error %>
+        </div>
+    <% } %>
+
+    <!-- Countdown Timer Banner (Khóa Giữ Ghế Tạm Thời) -->
     <div class="alert alert-danger d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-3 p-3 rounded-4 mb-4 shadow-sm border-danger-subtle">
         <div class="d-flex align-items-center gap-3">
             <div class="bg-danger text-white rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 40px; height: 40px;">
@@ -18,7 +53,7 @@
         </div>
     </div>
 
-    <form action="/booking/process-payment" method="POST" id="checkoutForm">
+    <form action="/booking/process-payment" method="POST" id="checkoutForm" onsubmit="return validatePaymentForm()">
         <input type="hidden" name="showtime_id" value="<%= showtime.id %>">
 
         <div class="row g-4">
@@ -43,12 +78,12 @@
                         <div class="col-12">
                             <label class="form-label small fw-bold">Email nhận mã vé QR <span class="text-danger">*</span></label>
                             <input type="email" name="customer_email" class="form-control" value="<%= currentUser ? currentUser.email : '' %>" placeholder="email@example.com" required>
-                            <div class="form-text small text-muted">Mã vé điện tử và QR Code sẽ được gửi qua email và hiển thị ngay sau thanh toán.</div>
+                            <div class="form-text small text-muted">Mã đơn hàng sẽ được gửi ngay sau khi đặt; trạng thái chuyển sang <strong>Đã thanh toán</strong> ngay khi Admin xác nhận đã nhận tiền.</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Phương thức thanh toán (Phong cách CGV & Beta) -->
+                <!-- Phương thức thanh toán động theo cấu hình Admin -->
                 <div class="card bg-white border-0 p-4 rounded-4 shadow-sm">
                     <h5 class="text-dark fw-bold mb-3 d-flex align-items-center gap-2">
                         <i class="fa-solid fa-credit-card text-danger"></i>
@@ -56,134 +91,307 @@
                     </h5>
 
                     <div class="d-flex flex-column gap-3">
-                        <!-- 1. MBBank VietQR 24/7 (STK: 033320012005 - NGUYEN MANH QUYET) -->
-                        <label class="payment-option-card border-primary" style="background-color: #f8faff; border-width: 2px;">
-                            <input class="form-check-input" type="radio" name="payment_method" value="mbbank_qr" checked onchange="togglePaymentDetails()">
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                                <span class="badge text-white px-2 py-1 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0033a0 0%, #1e40af 100%); letter-spacing: 0.5px;">
-                                    <i class="fa-solid fa-qrcode me-1"></i> MB BANK
-                                </span>
-                                <div>
-                                    <div class="text-dark fw-bold">Chuyển Khoản Mã QR Ngân Hàng MB (VietQR Napas 24/7)</div>
-                                    <div class="text-muted small">STK: <strong class="text-primary font-monospace">033320012005</strong> • Chủ TK: <strong class="text-dark">NGUYEN MANH QUYET</strong> • Miễn phí 24/7</div>
-                                </div>
-                            </div>
-                        </label>
-
-                        <!-- Khối Hiển Thị Chi Tiết Quét Mã QR MBBank -->
-                        <div id="mbQrBox" class="p-3 p-md-4 rounded-4 border bg-white shadow-sm mt-1 mb-2">
-                            <div class="row align-items-center g-4">
-                                <div class="col-md-5 text-center">
-                                    <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm position-relative">
-                                        <img src="https://img.vietqr.io/image/MB-033320012005-compact2.png?amount=<%= grandTotal %>&addInfo=DATVE%20<%= showtime.id %>&accountName=NGUYEN%20MANH%20QUYET" 
-                                             alt="Mã QR MBBank NGUYEN MANH QUYET" 
-                                             class="img-fluid rounded mx-auto" 
-                                             style="max-width: 220px; width: 100%;"
-                                             id="mbQrImage">
-                                    </div>
-                                    <div class="small text-muted mt-2 fw-semibold">
-                                        <i class="fa-solid fa-camera text-primary me-1"></i> Mở app ngân hàng bất kỳ để quét mã
-                                    </div>
-                                </div>
-                                <div class="col-md-7">
-                                    <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="badge bg-primary px-2 py-1">MB</span>
-                                            <h6 class="text-dark fw-bold mb-0">Ngân hàng TMCP Quân đội (MBBank)</h6>
+                        <% paymentMethods.forEach((pm, idx) => { %>
+                            <% const isAutoMethod = ['vnpay', 'momo', 'zalopay'].includes(pm.id); %>
+                            <!-- Radio Card -->
+                            <label class="payment-option-card <%= idx === 0 ? 'border-primary' : '' %>" data-method-card="<%= pm.id %>" data-is-auto="<%= isAutoMethod ? '1' : '0' %>" style="<%= idx === 0 ? 'background-color: #f8faff; border-width: 2px;' : '' %>">
+                                <input class="form-check-input" type="radio" name="payment_method" value="<%= pm.id %>" <%= idx === 0 ? 'checked' : '' %> onchange="togglePaymentDetails()">
+                                <div class="d-flex align-items-center justify-content-between gap-2 flex-grow-1 flex-wrap">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <% if (pm.id === 'mbbank_qr') { %>
+                                            <span class="badge text-white px-2 py-1 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0033a0 0%, #1e40af 100%); letter-spacing: 0.5px;">
+                                                <i class="fa-solid fa-qrcode me-1"></i> <%= paymentSettings.payment_bank_code || 'MB' %>
+                                            </span>
+                                        <% } else if (pm.id === 'vnpay') { %>
+                                            <span class="badge bg-primary px-2 py-1 fw-bold">VNPAY</span>
+                                        <% } else if (pm.id === 'momo') { %>
+                                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #a50064;">MOMO</span>
+                                        <% } else if (pm.id === 'zalopay') { %>
+                                            <span class="badge text-white px-2 py-1 fw-bold" style="background-color: #0068ff;">ZALOPAY</span>
+                                        <% } else if (pm.id === 'card') { %>
+                                            <span class="badge bg-warning text-dark px-2 py-1 fw-bold">VISA / ATM</span>
+                                        <% } else { %>
+                                            <span class="badge bg-success px-2 py-1 fw-bold">TIỀN MẶT</span>
+                                        <% } %>
+                                        <div>
+                                            <div class="text-dark fw-bold"><%= pm.title %></div>
+                                            <div class="text-muted small"><%= pm.subtitle %></div>
                                         </div>
-                                        <span class="badge bg-success-subtle text-success border border-success-subtle small">
-                                            <i class="fa-solid fa-bolt me-1"></i> Xử lý tức thì
+                                    </div>
+                                    <% if (isAutoMethod) { %>
+                                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1">
+                                            <i class="fa-solid fa-bolt me-1"></i>Tự động tức thì
                                         </span>
-                                    </div>
+                                    <% } else { %>
+                                        <span class="badge bg-warning-subtle text-warning-emphasis border border-warning rounded-pill px-2 py-1">
+                                            <i class="fa-solid fa-user-check me-1"></i>Admin duyệt
+                                        </span>
+                                    <% } %>
+                                </div>
+                            </label>
 
-                                    <!-- STK -->
-                                    <div class="p-2 mb-2 rounded bg-light border">
-                                        <div class="text-muted small">Số tài khoản (STK):</div>
-                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
-                                            <span class="fs-5 fw-extrabold text-primary font-monospace" id="stkValue">033320012005</span>
-                                            <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-bold copy-btn" onclick="copyToClipboard('033320012005', this)">
-                                                <i class="fa-regular fa-copy me-1"></i> Sao chép STK
-                                            </button>
+                            <!-- Chi tiết 1: VietQR Ngân hàng -->
+                            <% if (pm.id === 'mbbank_qr') { %>
+                                <div id="panel_mbbank_qr" class="payment-detail-panel p-3 p-md-4 rounded-4 border bg-white shadow-sm">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-5 text-center">
+                                            <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm">
+                                                <img src="https://img.vietqr.io/image/<%= encodeURIComponent(paymentSettings.payment_bank_code || 'MB') %>-<%= encodeURIComponent(paymentSettings.payment_bank_account || '033320012005') %>-compact2.png?amount=<%= grandTotal %>&addInfo=<%= encodeURIComponent(transferMemo) %>&accountName=<%= encodeURIComponent(paymentSettings.payment_bank_owner || 'NGUYEN MANH QUYET') %>"
+                                                     alt="Mã QR Ngân hàng"
+                                                     class="img-fluid rounded mx-auto"
+                                                     style="max-width: 220px; width: 100%;">
+                                            </div>
+                                            <div class="small text-muted mt-2 fw-semibold">
+                                                <i class="fa-solid fa-camera text-primary me-1"></i> Mở app ngân hàng bất kỳ để quét mã VietQR
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span class="badge bg-primary px-2 py-1"><%= paymentSettings.payment_bank_code || 'MB' %></span>
+                                                    <h6 class="text-dark fw-bold mb-0"><%= paymentSettings.payment_bank_name %></h6>
+                                                </div>
+                                            </div>
+
+                                            <div class="p-2 mb-2 rounded bg-light border">
+                                                <div class="text-muted small">Số tài khoản (STK):</div>
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
+                                                    <span class="fs-5 fw-extrabold text-primary font-monospace"><%= paymentSettings.payment_bank_account %></span>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-bold" onclick="copyToClipboard('<%= paymentSettings.payment_bank_account %>', this)">
+                                                        <i class="fa-regular fa-copy me-1"></i> Sao chép STK
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="p-2 mb-2 rounded bg-light border">
+                                                <div class="text-muted small">Chủ tài khoản:</div>
+                                                <div class="fw-bold text-dark text-uppercase fs-6"><%= paymentSettings.payment_bank_owner %></div>
+                                            </div>
+
+                                            <div class="p-2 mb-2 rounded bg-light border">
+                                                <div class="text-muted small">Số tiền cần chuyển:</div>
+                                                <div class="fw-extrabold text-danger fs-5"><%= grandTotal.toLocaleString('vi-VN') %> đ</div>
+                                            </div>
+
+                                            <div class="p-2 mb-3 rounded bg-light border">
+                                                <div class="text-muted small">Nội dung chuyển khoản (Memo):</div>
+                                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
+                                                    <span class="fw-bold text-dark font-monospace text-break"><%= transferMemo %></span>
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 fw-bold" onclick="copyToClipboard('<%= transferMemo %>', this)">
+                                                        <i class="fa-regular fa-copy me-1"></i> Sao chép
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            <div class="alert alert-warning py-2 px-3 small mb-0 rounded-3">
+                                                <i class="fa-solid fa-hourglass-half me-1"></i> Sau khi chuyển khoản, bấm <strong>"XÁC NHẬN THANH TOÁN"</strong>. Admin sẽ kiểm tra và bấm <strong>"Đã nhận tiền"</strong> để kích hoạt trạng thái <strong>Đã thanh toán</strong>.
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                            <% } %>
 
-                                    <!-- Chủ tài khoản -->
-                                    <div class="p-2 mb-2 rounded bg-light border">
-                                        <div class="text-muted small">Chủ tài khoản:</div>
-                                        <div class="fw-bold text-dark text-uppercase fs-6">NGUYEN MANH QUYET</div>
-                                    </div>
-
-                                    <!-- Số tiền -->
-                                    <div class="p-2 mb-2 rounded bg-light border">
-                                        <div class="text-muted small">Số tiền cần thanh toán:</div>
-                                        <div class="fw-extrabold text-danger fs-5"><%= grandTotal.toLocaleString('vi-VN') %> đ</div>
-                                    </div>
-
-                                    <!-- Nội dung chuyển khoản -->
-                                    <div class="p-2 mb-3 rounded bg-light border">
-                                        <div class="text-muted small">Nội dung chuyển khoản (Memo):</div>
-                                        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mt-1">
-                                            <span class="fw-bold text-dark font-monospace text-break" id="memoValue">DATVE <%= showtime.id %> <%= (currentUser && currentUser.phone ? currentUser.phone : '') %></span>
-                                            <button type="button" class="btn btn-outline-secondary btn-sm py-1 px-3 fw-bold copy-btn" onclick="copyToClipboard(document.getElementById('memoValue').innerText, this)">
-                                                <i class="fa-regular fa-copy me-1"></i> Sao chép
-                                            </button>
+                            <!-- Chi tiết 2: VNPAY -->
+                            <% if (pm.id === 'vnpay') { %>
+                                <div id="panel_vnpay" class="payment-detail-panel p-3 p-md-4 rounded-4 border bg-white shadow-sm" style="display: none;">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-5 text-center">
+                                            <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm">
+                                                <img src="<%= paymentQrs.vnpay %>" alt="VNPAY QR" class="img-fluid rounded" style="max-width: 200px;">
+                                            </div>
+                                            <div class="small text-primary fw-semibold mt-2">
+                                                <i class="fa-solid fa-qrcode me-1"></i> Quét mã VNPAY-QR trên Mobile Banking
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <h6 class="fw-bold text-primary mb-3 border-bottom pb-2">
+                                                <i class="fa-solid fa-building-columns me-1"></i> Cổng Thanh Toán VNPAY
+                                            </h6>
+                                            <div class="mb-3">
+                                                <label class="form-label small fw-bold text-dark">Chọn ngân hàng thanh toán <span class="text-danger">*</span></label>
+                                                <select name="vnpay_bank" id="vnpayBankSelect" class="form-select form-select-sm">
+                                                    <option value="VNPAY-QR (Ứng dụng Mobile Banking)">VNPAY-QR (Quét mã trên ứng dụng Ngân hàng)</option>
+                                                    <option value="Vietcombank (VCB)">Ngân hàng Vietcombank (VCB)</option>
+                                                    <option value="VietinBank (CTG)">Ngân hàng VietinBank (CTG)</option>
+                                                    <option value="BIDV">Ngân hàng BIDV</option>
+                                                    <option value="Techcombank (TCB)">Ngân hàng Techcombank (TCB)</option>
+                                                    <option value="MBBank (MB)">Ngân hàng Quân đội (MBBank)</option>
+                                                    <option value="ACB">Ngân hàng Á Châu (ACB)</option>
+                                                    <option value="VPBank">Ngân hàng VPBank</option>
+                                                    <option value="Agribank">Ngân hàng Agribank</option>
+                                                    <option value="TPBank">Ngân hàng TPBank</option>
+                                                </select>
+                                            </div>
+                                            <div class="p-2 mb-2 rounded bg-light border small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Mã điểm chấp nhận (TMN):</span>
+                                                    <strong class="font-monospace text-dark"><%= paymentSettings.payment_vnpay_tmn %></strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Số tiền giao dịch:</span>
+                                                    <strong class="text-danger"><%= grandTotal.toLocaleString('vi-VN') %> đ</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Nội dung:</span>
+                                                    <strong class="font-monospace text-dark"><%= transferMemo %></strong>
+                                                </div>
+                                            </div>
+                                            <div class="alert alert-success py-2 px-3 small mb-0 rounded-3">
+                                                <i class="fa-solid fa-bolt me-1"></i> <strong>Thanh toán tự động:</strong> Bấm <strong>"THANH TOÁN TỰ ĐỘNG NGAY"</strong> để hệ thống xác nhận tức thì và cấp mã vé QR vào rạp ngay!
+                                            </div>
                                         </div>
                                     </div>
+                                </div>
+                            <% } %>
 
-                                    <div class="alert alert-info py-2 px-3 small mb-0 rounded-3">
-                                        <i class="fa-solid fa-circle-check text-info me-1"></i> Sau khi quét mã thành công, hãy bấm <strong>"XÁC NHẬN THANH TOÁN"</strong> bên dưới để hoàn tất và nhận vé ngay!
+                            <!-- Chi tiết 3: Ví MoMo -->
+                            <% if (pm.id === 'momo') { %>
+                                <div id="panel_momo" class="payment-detail-panel p-3 p-md-4 rounded-4 border shadow-sm" style="display: none; background-color: #fff5fa; border-color: #f4b6d4 !important;">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-5 text-center">
+                                            <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm">
+                                                <img src="<%= paymentQrs.momo %>" alt="MoMo QR" class="img-fluid rounded" style="max-width: 200px;">
+                                            </div>
+                                            <div class="small fw-semibold mt-2" style="color: #a50064;">
+                                                <i class="fa-solid fa-mobile-screen me-1"></i> Mở ứng dụng MoMo để quét mã
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: #a50064;">
+                                                <i class="fa-solid fa-wallet me-1"></i> Thanh Toán Qua Ví MoMo
+                                            </h6>
+                                            <div class="p-2 mb-2 rounded bg-white border">
+                                                <div class="text-muted small">Số điện thoại nhận MoMo:</div>
+                                                <div class="d-flex align-items-center justify-content-between gap-2 mt-1">
+                                                    <span class="fs-5 fw-extrabold font-monospace" style="color: #a50064;"><%= paymentSettings.payment_momo_phone %></span>
+                                                    <button type="button" class="btn btn-outline-danger btn-sm py-1 px-3 fw-bold" onclick="copyToClipboard('<%= paymentSettings.payment_momo_phone %>', this)">
+                                                        <i class="fa-regular fa-copy me-1"></i> Sao chép
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="p-2 mb-2 rounded bg-white border small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Chủ ví:</span>
+                                                    <strong class="text-dark"><%= paymentSettings.payment_momo_owner %></strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Số tiền:</span>
+                                                    <strong class="text-danger"><%= grandTotal.toLocaleString('vi-VN') %> đ</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Lời nhắn:</span>
+                                                    <strong class="font-monospace text-dark"><%= transferMemo %></strong>
+                                                </div>
+                                            </div>
+                                            <div class="mb-0">
+                                                <label class="form-label small fw-bold text-dark mb-1">Mã giao dịch MoMo (không bắt buộc)</label>
+                                                <input type="text" name="wallet_ref" class="form-control form-control-sm momo-ref-input" placeholder="Nhập mã GD MoMo nếu đã chuyển để Admin duyệt nhanh">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
+                            <% } %>
 
-                        <!-- 2. Cổng VNPAY -->
-                        <label class="payment-option-card">
-                            <input class="form-check-input" type="radio" name="payment_method" value="vnpay" onchange="togglePaymentDetails()">
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                                <span class="badge bg-primary px-2 py-1">VNPAY</span>
-                                <div>
-                                    <div class="text-dark fw-bold">Cổng VNPAY / Thẻ ATM Nội Địa</div>
-                                    <div class="text-muted small">Hỗ trợ tất cả ứng dụng Mobile Banking & Ví điện tử</div>
+                            <!-- Chi tiết 4: Ví ZaloPay -->
+                            <% if (pm.id === 'zalopay') { %>
+                                <div id="panel_zalopay" class="payment-detail-panel p-3 p-md-4 rounded-4 border shadow-sm" style="display: none; background-color: #f0f7ff; border-color: #b6d4fe !important;">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-5 text-center">
+                                            <div class="bg-white p-2 rounded-3 border d-inline-block shadow-sm">
+                                                <img src="<%= paymentQrs.zalopay %>" alt="ZaloPay QR" class="img-fluid rounded" style="max-width: 200px;">
+                                            </div>
+                                            <div class="small fw-semibold mt-2" style="color: #0068ff;">
+                                                <i class="fa-solid fa-mobile-screen me-1"></i> Mở ứng dụng ZaloPay để quét mã
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <h6 class="fw-bold mb-3 border-bottom pb-2" style="color: #0068ff;">
+                                                <i class="fa-solid fa-wallet me-1"></i> Thanh Toán Qua Ví ZaloPay
+                                            </h6>
+                                            <div class="p-2 mb-2 rounded bg-white border">
+                                                <div class="text-muted small">Số điện thoại nhận ZaloPay:</div>
+                                                <div class="d-flex align-items-center justify-content-between gap-2 mt-1">
+                                                    <span class="fs-5 fw-extrabold font-monospace" style="color: #0068ff;"><%= paymentSettings.payment_zalopay_phone %></span>
+                                                    <button type="button" class="btn btn-outline-primary btn-sm py-1 px-3 fw-bold" onclick="copyToClipboard('<%= paymentSettings.payment_zalopay_phone %>', this)">
+                                                        <i class="fa-regular fa-copy me-1"></i> Sao chép
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="p-2 mb-2 rounded bg-white border small">
+                                                <div class="d-flex justify-content-between">
+                                                    <span class="text-muted">Chủ ví:</span>
+                                                    <strong class="text-dark"><%= paymentSettings.payment_zalopay_owner %></strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Số tiền:</span>
+                                                    <strong class="text-danger"><%= grandTotal.toLocaleString('vi-VN') %> đ</strong>
+                                                </div>
+                                                <div class="d-flex justify-content-between mt-1">
+                                                    <span class="text-muted">Nội dung:</span>
+                                                    <strong class="font-monospace text-dark"><%= transferMemo %></strong>
+                                                </div>
+                                            </div>
+                                            <div class="mb-0">
+                                                <label class="form-label small fw-bold text-dark mb-1">Mã giao dịch ZaloPay (không bắt buộc)</label>
+                                                <input type="text" name="wallet_ref" class="form-control form-control-sm zalopay-ref-input" placeholder="Nhập mã GD ZaloPay để Admin đối soát nhanh">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        </label>
+                            <% } %>
 
-                        <!-- 3. Ví MoMo -->
-                        <label class="payment-option-card">
-                            <input class="form-check-input" type="radio" name="payment_method" value="momo" onchange="togglePaymentDetails()">
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                                <span class="badge bg-danger px-2 py-1">MOMO</span>
-                                <div>
-                                    <div class="text-dark fw-bold">Ví Điện Tử MoMo</div>
-                                    <div class="text-muted small">Thanh toán tức thì qua ứng dụng MoMo</div>
+                            <!-- Chi tiết 5: Thẻ Quốc tế / ATM -->
+                            <% if (pm.id === 'card') { %>
+                                <div id="panel_card" class="payment-detail-panel p-3 p-md-4 rounded-4 border bg-light shadow-sm" style="display: none;">
+                                    <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">
+                                        <i class="fa-regular fa-credit-card text-warning me-1"></i> Nhập Thông Tin Thẻ Quốc Tế / ATM
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Loại thẻ</label>
+                                            <select name="card_type" class="form-select form-select-sm">
+                                                <option value="VISA">Thẻ Visa</option>
+                                                <option value="MASTERCARD">Thẻ MasterCard</option>
+                                                <option value="JCB">Thẻ JCB</option>
+                                                <option value="ATM">Thẻ ATM Nội Địa (Napas)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Số thẻ <span class="text-danger">*</span></label>
+                                            <input type="text" name="card_number" id="cardNumberInput" class="form-control form-control-sm font-monospace" placeholder="4123 4567 8901 2345" maxlength="19" oninput="formatCardNumber(this)">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small fw-bold">Tên in trên thẻ (Không dấu) <span class="text-danger">*</span></label>
+                                            <input type="text" name="card_holder" id="cardHolderInput" class="form-control form-control-sm text-uppercase" placeholder="NGUYEN VAN A">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">Hết hạn (MM/YY) <span class="text-danger">*</span></label>
+                                            <input type="text" id="cardExpiryInput" class="form-control form-control-sm font-monospace" placeholder="12/28" maxlength="5" oninput="formatCardExpiry(this)">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="form-label small fw-bold">CVV/CVC <span class="text-danger">*</span></label>
+                                            <input type="password" id="cardCvvInput" class="form-control form-control-sm font-monospace" placeholder="123" maxlength="4">
+                                        </div>
+                                    </div>
+                                    <div class="small text-muted mt-2">
+                                        <i class="fa-solid fa-lock text-success me-1"></i> Hệ thống không lưu mã CVV hay số thẻ đầy đủ (chỉ lưu 4 số cuối để đối soát).
+                                    </div>
                                 </div>
-                            </div>
-                        </label>
+                            <% } %>
 
-                        <!-- 4. Thẻ ATM / Visa -->
-                        <label class="payment-option-card">
-                            <input class="form-check-input" type="radio" name="payment_method" value="card" onchange="togglePaymentDetails()">
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                                <span class="badge bg-warning text-dark px-2 py-1">VISA / ATM</span>
-                                <div>
-                                    <div class="text-dark fw-bold">Thẻ Quốc Tế (Visa, MasterCard, JCB)</div>
-                                    <div class="text-muted small">Bảo mật thanh toán quốc tế 3D-Secure</div>
+                            <!-- Chi tiết 6: Tiền mặt tại quầy -->
+                            <% if (pm.id === 'cash') { %>
+                                <div id="panel_cash" class="payment-detail-panel p-3 p-md-4 rounded-4 border bg-success-subtle border-success-subtle shadow-sm" style="display: none;">
+                                    <h6 class="fw-bold text-success mb-2">
+                                        <i class="fa-solid fa-money-bill-wave me-1"></i> Hướng Dẫn Thanh Toán Tiền Mặt Tại Quầy
+                                    </h6>
+                                    <p class="small text-dark mb-2"><%= paymentSettings.payment_cash_note || 'Vui lòng đến quầy vé trước giờ chiếu ít nhất 15 phút để thanh toán tiền mặt và kích hoạt vé.' %></p>
+                                    <div class="small text-secondary">
+                                        <i class="fa-solid fa-circle-info me-1"></i> Sau khi nhân viên/Admin thu tiền mặt tại quầy và nhấn <strong>"Đã nhận tiền"</strong>, trạng thái đơn hàng của bạn sẽ chuyển sang <strong>Đã thanh toán</strong>.
+                                    </div>
                                 </div>
-                            </div>
-                        </label>
-
-                        <!-- 5. Tiền mặt tại quầy -->
-                        <label class="payment-option-card">
-                            <input class="form-check-input" type="radio" name="payment_method" value="cash" onchange="togglePaymentDetails()">
-                            <div class="d-flex align-items-center gap-2 flex-grow-1">
-                                <span class="badge bg-success px-2 py-1">TIỀN MẶT</span>
-                                <div>
-                                    <div class="text-dark fw-bold">Thanh Toán Trực Tiếp Tại Quầy (Nhận Vé)</div>
-                                    <div class="text-muted small">Áp dụng cho nhân viên quầy POS hoặc nhận vé tại rạp</div>
-                                </div>
-                            </div>
-                        </label>
+                            <% } %>
+                        <% }) %>
                     </div>
                 </div>
             </div>
@@ -240,15 +448,20 @@
                         </div>
                     <% } %>
 
-                    <div class="border-top pt-3 mb-4">
+                    <div class="border-top pt-3 mb-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <span class="fs-5 text-dark fw-bold">Tổng thanh toán:</span>
                             <span class="fs-3 fw-extrabold text-danger"><%= grandTotal.toLocaleString('vi-VN') %> đ</span>
                         </div>
                     </div>
 
-                    <button type="submit" class="btn btn-danger w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm">
-                        <i class="fa-solid fa-lock me-2"></i> XÁC NHẬN THANH TOÁN
+                    <div id="paymentStatusNotice" class="alert alert-success border-success-subtle small mb-3 py-2">
+                        <i class="fa-solid fa-bolt text-success me-1"></i>
+                        <strong>Thanh toán tự động:</strong> Đơn hàng sẽ được xác nhận <strong>Đã thanh toán</strong> và cấp mã QR ngay lập tức!
+                    </div>
+
+                    <button type="submit" id="btnCheckoutSubmit" class="btn btn-danger w-100 py-3 rounded-pill fw-bold fs-5 shadow-sm">
+                        <i class="fa-solid fa-bolt me-2"></i> THANH TOÁN TỰ ĐỘNG NGAY
                     </button>
                     <div class="text-center text-muted small mt-2">
                         <i class="fa-solid fa-shield-halved text-success me-1"></i> Giao dịch bảo mật 256-bit SSL
@@ -269,11 +482,12 @@ function formatTimer(sec) {
     const s = sec % 60;
     return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
 }
+timerEl.innerText = formatTimer(remainingSeconds);
 
 const timerInterval = setInterval(() => {
     if (remainingSeconds <= 0) {
         clearInterval(timerInterval);
-        alert('Đã hết thời gian giữ ghế tạm thời (5 phút)! Hệ thống sẽ đưa bạn quay lại bước chọn ghế.');
+        alert('Đã hết thời gian giữ ghế tạm thời! Hệ thống sẽ đưa bạn quay lại bước chọn ghế.');
         window.location.href = '/booking/seats/<%= showtime.id %>';
         return;
     }
@@ -283,14 +497,100 @@ const timerInterval = setInterval(() => {
 
 function togglePaymentDetails() {
     const selected = document.querySelector('input[name="payment_method"]:checked');
-    const qrBox = document.getElementById('mbQrBox');
-    if (qrBox) {
-        if (selected && selected.value === 'mbbank_qr') {
-            qrBox.style.display = 'block';
+    const selectedVal = selected ? selected.value : '';
+
+    document.querySelectorAll('.payment-detail-panel').forEach(panel => {
+        panel.style.display = 'none';
+    });
+
+    // Vô hiệu hóa input wallet_ref ở các panel đang ẩn để không gửi trùng name
+    document.querySelectorAll('input[name="wallet_ref"]').forEach(inp => {
+        inp.disabled = true;
+    });
+
+    document.querySelectorAll('[data-method-card]').forEach(card => {
+        if (card.dataset.methodCard === selectedVal) {
+            card.classList.add('border-primary');
+            card.style.backgroundColor = '#f8faff';
+            card.style.borderWidth = '2px';
         } else {
-            qrBox.style.display = 'none';
+            card.classList.remove('border-primary');
+            card.style.backgroundColor = '';
+            card.style.borderWidth = '';
+        }
+    });
+
+    const activePanel = document.getElementById('panel_' + selectedVal);
+    if (activePanel) {
+        activePanel.style.display = 'block';
+        activePanel.querySelectorAll('input[name="wallet_ref"]').forEach(inp => {
+            inp.disabled = false;
+        });
+    }
+
+    const isAuto = ['vnpay', 'momo', 'zalopay'].includes(selectedVal);
+    const noticeEl = document.getElementById('paymentStatusNotice');
+    const submitBtn = document.getElementById('btnCheckoutSubmit');
+    if (noticeEl) {
+        if (isAuto) {
+            noticeEl.className = 'alert alert-success border-success-subtle small mb-3 py-2';
+            noticeEl.innerHTML = '<i class="fa-solid fa-bolt text-success me-1"></i><strong>Thanh toán tự động:</strong> Hệ thống sẽ tự động xác nhận <strong>Đã thanh toán</strong> và cấp mã vé QR ngay lập tức!';
+        } else {
+            noticeEl.className = 'alert alert-warning border-warning small mb-3 py-2';
+            noticeEl.innerHTML = '<i class="fa-solid fa-hourglass-half text-warning-emphasis me-1"></i><strong>Chờ Admin duyệt:</strong> Đơn hàng sẽ giữ ghế và chuyển sang <strong>Đã thanh toán</strong> khi Admin ấn <strong>Đã nhận tiền</strong>.';
         }
     }
+    if (submitBtn) {
+        submitBtn.innerHTML = isAuto
+            ? '<i class="fa-solid fa-bolt me-2"></i> THANH TOÁN TỰ ĐỘNG NGAY'
+            : '<i class="fa-solid fa-lock me-2"></i> GỬI ĐƠN & CHỜ XÁC NHẬN';
+    }
+}
+
+function formatCardNumber(inp) {
+    const digits = inp.value.replace(/\D/g, '').substring(0, 16);
+    inp.value = digits.replace(/(.{4})/g, '$1 ').trim();
+}
+
+function formatCardExpiry(inp) {
+    const digits = inp.value.replace(/\D/g, '').substring(0, 4);
+    if (digits.length >= 3) {
+        inp.value = digits.substring(0, 2) + '/' + digits.substring(2);
+    } else {
+        inp.value = digits;
+    }
+}
+
+function validatePaymentForm() {
+    const selected = document.querySelector('input[name="payment_method"]:checked');
+    if (!selected) {
+        alert('Vui lòng chọn phương thức thanh toán!');
+        return false;
+    }
+    if (selected.value === 'card') {
+        const num = (document.getElementById('cardNumberInput')?.value || '').replace(/\D/g, '');
+        const holder = (document.getElementById('cardHolderInput')?.value || '').trim();
+        const expiry = (document.getElementById('cardExpiryInput')?.value || '').trim();
+        const cvv = (document.getElementById('cardCvvInput')?.value || '').trim();
+
+        if (num.length < 12) {
+            alert('Vui lòng nhập số thẻ hợp lệ (tối thiểu 12 chữ số)!');
+            return false;
+        }
+        if (!holder) {
+            alert('Vui lòng nhập tên in trên thẻ!');
+            return false;
+        }
+        if (!/^(0[1-9]|1[0-2])\/\d{2}$/.test(expiry)) {
+            alert('Vui lòng nhập ngày hết hạn thẻ theo định dạng MM/YY (VD: 12/28)!');
+            return false;
+        }
+        if (!/^\d{3,4}$/.test(cvv)) {
+            alert('Vui lòng nhập mã bảo mật CVV/CVC gồm 3-4 chữ số!');
+            return false;
+        }
+    }
+    return true;
 }
 
 function copyToClipboard(text, btn) {
@@ -306,6 +606,9 @@ function copyToClipboard(text, btn) {
         prompt('Sao chép thông tin:', text);
     });
 }
+
+// Khởi tạo hiển thị panel đầu tiên
+togglePaymentDetails();
 </script>
 
 <%- include('../layouts/footer') %>

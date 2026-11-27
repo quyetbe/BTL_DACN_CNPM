@@ -46,7 +46,8 @@ function formatPrice(val) {
     return Number(val || 0).toLocaleString('vi-VN') + ' đ';
 }
 
-const { query } = require('../database/db');
+const { query, get } = require('../database/db');
+const { formatPaymentMethod } = require('../services/paymentConfig');
 
 let cachedCinemas = null;
 async function getCinemasMap() {
@@ -64,13 +65,64 @@ async function getCinemasMap() {
     return cachedCinemas;
 }
 
+const CLIENT_PORT = Number(process.env.PORT || 3000);
+const ADMIN_PORT = Number(process.env.ADMIN_PORT || 3001);
+
+function isAdminPortalRequest(req) {
+    const localPort = req.socket ? req.socket.localPort : null;
+    if (localPort === ADMIN_PORT) return true;
+    const p = req.path || '';
+    if (p.startsWith('/admin') || p.startsWith('/manager') || p.startsWith('/staff')) return true;
+    if ((req.query && req.query.portal === 'admin') || (req.body && req.body.portal === 'admin')) return true;
+    return false;
+}
+
 async function checkAuth(req, res, next) {
-    res.locals.currentUser = req.session.user || null;
+    // Tương thích ngược với session cũ (req.session.user)
+    if (req.session && req.session.user && !req.session.clientUser && !req.session.adminUser) {
+        if (['admin', 'manager', 'staff'].includes(req.session.user.role_name)) {
+            req.session.adminUser = req.session.user;
+        } else {
+            req.session.clientUser = req.session.user;
+        }
+    }
+
+    const portalType = isAdminPortalRequest(req) ? 'admin' : 'client';
+    const clientUser = (req.session && req.session.clientUser) || null;
+    const adminUser = (req.session && req.session.adminUser) || null;
+
+    // Tách phiên song song HOÀN TOÀN ĐỘC LẬP:
+    // - Cổng Admin/Manager/Staff (:3001 hoặc /admin, /manager, /staff) chỉ dùng adminUser
+    // - Cổng Khách hàng (:3000) chỉ dùng clientUser (đăng xuất Client sẽ về trạng thái khách vãng lai, KHÔNG hiện thành Admin/Manager)
+    const activeUser = portalType === 'admin' ? adminUser : clientUser;
+
+    req.portalType = portalType;
+    req.currentUser = activeUser;
+
+    res.locals.portalType = portalType;
+    res.locals.currentUser = activeUser;
+    res.locals.clientUser = clientUser;
+    res.locals.adminUser = adminUser;
+    res.locals.clientPort = CLIENT_PORT;
+    res.locals.adminPort = ADMIN_PORT;
     res.locals.currentPath = req.path;
     res.locals.formatTime = formatTime;
     res.locals.formatDate = formatDate;
     res.locals.formatDateTime = formatDateTime;
     res.locals.formatPrice = formatPrice;
+    res.locals.formatPaymentMethod = formatPaymentMethod;
+    res.locals.pendingBookingsCount = 0;
+
+    if (adminUser && ['admin', 'manager'].includes(adminUser.role_name)) {
+        try {
+            const row = await get(
+                "SELECT COUNT(*) as count FROM bookings WHERE payment_status = 'pending' AND booking_status != 'cancelled'"
+            );
+            res.locals.pendingBookingsCount = row ? Number(row.count || 0) : 0;
+        } catch (e) {
+            res.locals.pendingBookingsCount = 0;
+        }
+    }
 
     const cinemaId = req.cookies.selectedCinemaId || null;
     res.locals.selectedCinemaId = cinemaId;
@@ -84,7 +136,8 @@ async function checkAuth(req, res, next) {
 }
 
 function requireLogin(req, res, next) {
-    if (!req.session.user) {
+    const activeUser = req.currentUser;
+    if (!activeUser) {
         if (req.headers['content-type']?.includes('application/json') || req.xhr) {
             return res.status(401).json({
                 success: false,
@@ -100,12 +153,13 @@ function requireLogin(req, res, next) {
 
 function requireRole(roles = []) {
     return (req, res, next) => {
-        if (!req.session.user) {
-            req.session.returnTo = req.originalUrl;
-            return res.redirect('/auth/login?error=' + encodeURIComponent('Vui lòng đăng nhập trước!'));
+        const adminUser = (req.session && req.session.adminUser) || null;
+        if (!adminUser) {
+            req.session.adminReturnTo = req.originalUrl;
+            return res.redirect('/auth/login?portal=admin&redirect=' + encodeURIComponent(req.originalUrl) + '&error=' + encodeURIComponent('Vui lòng đăng nhập tài khoản Quản trị / Quản lý / Nhân viên!'));
         }
 
-        const userRole = req.session.user.role_name;
+        const userRole = adminUser.role_name;
         // Quản trị viên (admin) luôn có quyền truy cập tất cả
         if (userRole === 'admin') {
             return next();

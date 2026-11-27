@@ -314,7 +314,15 @@ function renderVerificationResult(data) {
 
     btn.style.display = 'block';
 
-    if (tkt.status === 'unused') {
+    if (tkt.payment_status && tkt.payment_status !== 'paid') {
+        banner.className = 'alert alert-warning p-3 rounded-3 mb-3 d-flex align-items-center gap-3';
+        icon.className = 'fa-solid fa-hourglass-half text-warning fs-2';
+        title.innerText = 'CHƯA ĐƯỢC DUYỆT THANH TOÁN';
+        desc.innerText = 'Đơn hàng này đang chờ Admin ấn "Đã nhận tiền". Không thể cho khách vào phòng chiếu trước khi thanh toán được xác nhận!';
+        btn.disabled = true;
+        btn.className = 'btn btn-warning text-dark w-100 py-3 rounded-pill fw-bold fs-5';
+        btn.innerText = 'CHỜ ADMIN XÁC NHẬN THANH TOÁN';
+    } else if (tkt.status === 'unused') {
         banner.className = 'alert alert-success p-3 rounded-3 mb-3 d-flex align-items-center gap-3';
         icon.className = 'fa-solid fa-circle-check text-success fs-2';
         title.innerText = 'VÉ HỢP LỆ - CHƯA SỬ DỤNG';

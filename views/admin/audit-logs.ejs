@@ -1,58 +1,486 @@
 <%- include('../layouts/admin-header') %>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<%
+    const _statusFilter = locals.statusFilter || 'all';
+    const _isApprovalMode = Boolean(locals.isApprovalMode);
+    const _returnBase = _isApprovalMode ? '/admin/approvals' : '/admin/audit-logs';
+    const _counts = locals.counts || {
+        total: (bookings || []).length,
+        pending: (bookings || []).filter(b => b.payment_status === 'pending' && b.booking_status !== 'cancelled').length,
+        paid: (bookings || []).filter(b => b.payment_status === 'paid' && b.booking_status !== 'cancelled').length,
+        cancelled: (bookings || []).filter(b => b.booking_status === 'cancelled' || b.payment_status === 'failed').length
+    };
+    const _fmtPayment = (typeof locals.formatPaymentMethod === 'function') ? locals.formatPaymentMethod : (m => m);
+%>
+
+<!-- Toast thông báo thời gian thực (không reload trang) -->
+<div id="liveToastContainer" class="position-fixed bottom-0 end-0 p-3" style="z-index: 1080;"></div>
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h4 class="text-white fw-bold mb-1">Nhật Ký Đơn Hàng & Giao Dịch Toàn Hệ Thống</h4>
-        <p class="text-secondary small mb-0">Theo dõi toàn bộ lịch sử bán vé online và tại quầy POS phục vụ công tác thanh tra</p>
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+            <h4 class="text-dark fw-bold mb-0">
+                <% if (_isApprovalMode) { %>
+                    <i class="fa-solid fa-clipboard-check text-danger me-2"></i>Duyệt Đơn Thanh Toán (Admin / Manager)
+                <% } else { %>
+                    <i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Nhật Ký Đơn Hàng & Giao Dịch Toàn Hệ Thống
+                <% } %>
+            </h4>
+            <span id="liveSyncBadge" class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2 py-1 small">
+                <i class="fa-solid fa-circle me-1" style="font-size: 0.45rem; vertical-align: middle;"></i> Đồng bộ trực tiếp (không cần F5)
+            </span>
+        </div>
+        <p class="text-muted small mb-0">
+            Đơn <strong>VNPAY / MoMo / ZaloPay</strong> tự động xác nhận. Đơn <strong>VietQR / Thẻ / Tiền mặt</strong> sẽ xuất hiện ngay tại đây — ấn <strong class="text-success">"Đã nhận tiền"</strong> để duyệt tức thì mà không cần tải lại trang.
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <% if (_isApprovalMode) { %>
+            <a href="/admin/audit-logs" class="btn btn-outline-secondary btn-sm rounded-pill px-3 fw-semibold">
+                <i class="fa-solid fa-list me-1"></i> Xem Toàn Bộ Nhật Ký
+            </a>
+        <% } else { %>
+            <a href="/admin/approvals" class="btn btn-warning text-dark btn-sm rounded-pill px-3 fw-bold shadow-sm">
+                <i class="fa-solid fa-hourglass-half me-1"></i> Chỉ Xem Đơn Chờ Duyệt (<span id="btnPendingCount"><%= _counts.pending %></span>)
+            </a>
+        <% } %>
     </div>
 </div>
 
-<div class="card bg-card border-secondary rounded-4 shadow overflow-hidden">
+<!-- Thống kê nhanh trạng thái đơn hàng -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <a href="/admin/audit-logs" class="text-decoration-none">
+            <div class="stat-card" style="<%= _statusFilter === 'all' ? 'border: 2px solid #0f172a;' : '' %>">
+                <div>
+                    <div class="text-muted small fw-bold text-uppercase">Tổng Đơn Hàng</div>
+                    <div class="fs-3 fw-extrabold text-dark mt-1" id="kpiTotal"><%= _counts.total %></div>
+                </div>
+                <div class="stat-icon icon-blue"><i class="fa-solid fa-receipt"></i></div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="/admin/approvals" class="text-decoration-none">
+            <div class="stat-card" style="<%= _statusFilter === 'pending' ? 'border: 2px solid #ca8a04;' : '' %>">
+                <div>
+                    <div class="text-warning-emphasis small fw-bold text-uppercase">Chờ Duyệt Tiền</div>
+                    <div class="fs-3 fw-extrabold text-warning-emphasis mt-1" id="kpiPending"><%= _counts.pending %></div>
+                </div>
+                <div class="stat-icon icon-yellow"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="/admin/audit-logs?status=paid" class="text-decoration-none">
+            <div class="stat-card" style="<%= _statusFilter === 'paid' ? 'border: 2px solid #16a34a;' : '' %>">
+                <div>
+                    <div class="text-success small fw-bold text-uppercase">Đã Thanh Toán</div>
+                    <div class="fs-3 fw-extrabold text-success mt-1" id="kpiPaid"><%= _counts.paid %></div>
+                </div>
+                <div class="stat-icon icon-green"><i class="fa-solid fa-circle-check"></i></div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-md-3">
+        <a href="/admin/audit-logs?status=cancelled" class="text-decoration-none">
+            <div class="stat-card" style="<%= _statusFilter === 'cancelled' ? 'border: 2px solid #dc2626;' : '' %>">
+                <div>
+                    <div class="text-danger small fw-bold text-uppercase">Đã Hủy</div>
+                    <div class="fs-3 fw-extrabold text-danger mt-1" id="kpiCancelled"><%= _counts.cancelled %></div>
+                </div>
+                <div class="stat-icon" style="background: #fef2f2; color: #dc2626;"><i class="fa-solid fa-ban"></i></div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Bộ lọc nhanh -->
+<div class="d-flex flex-wrap gap-2 mb-3">
+    <a href="/admin/audit-logs" class="btn btn-sm rounded-pill px-3 fw-semibold <%= _statusFilter === 'all' ? 'btn-dark text-white' : 'btn-outline-secondary' %>">
+        Tất cả (<span id="filterTotal"><%= _counts.total %></span>)
+    </a>
+    <a href="/admin/approvals" class="btn btn-sm rounded-pill px-3 fw-bold <%= _statusFilter === 'pending' ? 'btn-warning text-dark' : 'btn-outline-warning text-dark' %>">
+        <i class="fa-solid fa-clock me-1"></i> Chờ duyệt tiền (<span id="filterPending"><%= _counts.pending %></span>)
+    </a>
+    <a href="/admin/audit-logs?status=paid" class="btn btn-sm rounded-pill px-3 fw-semibold <%= _statusFilter === 'paid' ? 'btn-success text-white' : 'btn-outline-success' %>">
+        <i class="fa-solid fa-check me-1"></i> Đã thanh toán (<span id="filterPaid"><%= _counts.paid %></span>)
+    </a>
+    <a href="/admin/audit-logs?status=cancelled" class="btn btn-sm rounded-pill px-3 fw-semibold <%= _statusFilter === 'cancelled' ? 'btn-danger text-white' : 'btn-outline-danger' %>">
+        <i class="fa-solid fa-xmark me-1"></i> Đã hủy (<span id="filterCancelled"><%= _counts.cancelled %></span>)
+    </a>
+</div>
+
+<div class="card bg-white border rounded-4 shadow-sm overflow-hidden">
     <div class="table-responsive">
-        <table class="table table-dark table-borderless align-middle mb-0">
+        <table class="table table-hover align-middle mb-0">
             <thead>
-                <tr class="border-bottom border-secondary text-secondary small">
+                <tr>
                     <th>MÃ ĐƠN HÀNG</th>
                     <th>KHÁCH HÀNG</th>
-                    <th>PHIM CHIẾU</th>
-                    <th>PHÒNG</th>
-                    <th>SUẤT CHIẾU</th>
-                    <th>KÊNH BÁN</th>
+                    <th>PHIM & SUẤT CHIẾU</th>
+                    <th>THANH TOÁN</th>
                     <th>TỔNG TIỀN</th>
                     <th>TRẠNG THÁI</th>
                     <th>THỜI GIAN</th>
+                    <th class="text-end">DUYỆT ĐƠN</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="bookingsTableBody">
                 <% if (bookings && bookings.length > 0) { %>
                     <% bookings.forEach(b => { %>
-                        <tr class="border-bottom border-secondary border-opacity-25 small">
-                            <td><code><%= b.booking_code %></code></td>
+                        <tr class="small" data-booking-id="<%= b.id %>" data-booking-code="<%= b.booking_code %>">
                             <td>
-                                <div class="fw-bold text-white"><%= b.customer_name %></div>
-                                <div class="text-secondary" style="font-size: 0.72rem;"><%= b.customer_phone || b.customer_email %></div>
+                                <code class="text-primary fw-bold"><%= b.booking_code %></code>
+                                <div class="text-muted" style="font-size: 0.72rem;"><%= b.ticket_count %> vé • <%= b.booking_type.toUpperCase() %></div>
                             </td>
-                            <td class="text-white"><%= b.movie_title %></td>
-                            <td><%= b.room_name %></td>
-                            <td><span class="badge bg-danger"><%= b.start_time %></span></td>
                             <td>
-                                <span class="badge <%= b.booking_type === 'pos' ? 'bg-warning text-dark' : 'bg-primary' %>">
-                                    <%= b.booking_type.toUpperCase() %> (<%= b.payment_method %>)
+                                <div class="fw-bold text-dark"><%= b.customer_name %></div>
+                                <div class="text-muted" style="font-size: 0.75rem;"><%= b.customer_phone || b.customer_email %></div>
+                            </td>
+                            <td>
+                                <div class="text-dark fw-semibold"><%= b.movie_title %></div>
+                                <div class="text-muted" style="font-size: 0.75rem;">
+                                    <%= b.room_name %> • <span class="text-danger fw-semibold"><%= formatDateTime(b.start_time) %></span>
+                                </div>
+                            </td>
+                            <td>
+                                <% const isAutoM = ['vnpay', 'momo', 'zalopay'].includes(b.payment_method); %>
+                                <span class="badge <%= b.booking_type === 'pos' ? 'bg-warning text-dark' : (isAutoM ? 'bg-info-subtle text-primary border border-info-subtle' : 'bg-primary text-white') %>">
+                                    <%= _fmtPayment(b.payment_method) %>
                                 </span>
+                                <% if (isAutoM) { %>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">Tự động</span>
+                                <% } %>
+                                <% if (b.payment_note) { %>
+                                    <div class="text-muted mt-1" style="font-size: 0.72rem; max-width: 240px;"><%= b.payment_note %></div>
+                                <% } %>
                             </td>
-                            <td class="text-warning fw-bold"><%= Number(b.total_amount).toLocaleString('vi-VN') %> đ</td>
+                            <td class="text-danger fw-bold text-nowrap"><%= Number(b.total_amount).toLocaleString('vi-VN') %> đ</td>
                             <td>
-                                <span class="badge bg-success">Đã thanh toán</span>
+                                <% if (b.booking_status === 'cancelled' || b.payment_status === 'failed') { %>
+                                    <span class="badge bg-danger text-white">
+                                        <i class="fa-solid fa-circle-xmark me-1"></i> Đã hủy
+                                    </span>
+                                <% } else if (b.payment_status === 'paid') { %>
+                                    <span class="badge bg-success text-white">
+                                        <i class="fa-solid fa-circle-check me-1"></i> Đã thanh toán
+                                    </span>
+                                    <% if (b.confirmed_by_name) { %>
+                                        <div class="text-muted mt-1" style="font-size: 0.7rem;">
+                                            Duyệt bởi: <strong><%= b.confirmed_by_name %></strong>
+                                            <% if (b.confirmed_at) { %> (<%= formatDateTime(b.confirmed_at) %>)<% } %>
+                                        </div>
+                                    <% } else if (['vnpay', 'momo', 'zalopay'].includes(b.payment_method)) { %>
+                                        <div class="text-success mt-1" style="font-size: 0.7rem;">
+                                            <i class="fa-solid fa-bolt me-1"></i>Xác nhận tự động
+                                        </div>
+                                    <% } %>
+                                <% } else if (b.payment_status === 'refunded') { %>
+                                    <span class="badge bg-secondary text-white">Đã hoàn tiền</span>
+                                <% } else { %>
+                                    <span class="badge bg-warning text-dark fw-bold">
+                                        <i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận tiền
+                                    </span>
+                                <% } %>
                             </td>
-                            <td class="text-secondary"><%= b.created_at %></td>
+                            <td class="text-muted text-nowrap"><%= formatDateTime(b.created_at) %></td>
+                            <td class="text-end text-nowrap">
+                                <% if (b.payment_status === 'pending' && b.booking_status !== 'cancelled') { %>
+                                    <% const amtStr = Number(b.total_amount).toLocaleString('vi-VN'); %>
+                                    <button type="button" class="btn btn-success text-white btn-sm fw-bold me-1 shadow-sm"
+                                            onclick="handleConfirmPayment(<%= b.id %>, '<%= b.booking_code %>', '<%= amtStr %>', this)">
+                                        <i class="fa-solid fa-check-double me-1"></i> Đã nhận tiền
+                                    </button>
+                                    <button type="button" class="btn btn-outline-danger btn-sm" title="Từ chối / Hủy đơn"
+                                            onclick="handleCancelBooking(<%= b.id %>, '<%= b.booking_code %>', this)">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                <% } else { %>
+                                    <a href="/booking/success/<%= b.booking_code %>" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold" title="Xem chi tiết vé">
+                                        <i class="fa-solid fa-ticket me-1"></i> Xem vé
+                                    </a>
+                                <% } %>
+                            </td>
                         </tr>
                     <% }) %>
                 <% } else { %>
-                    <tr><td colspan="9" class="text-center text-secondary py-4">Chưa có giao dịch nào</td></tr>
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="fa-solid fa-circle-check text-success fs-2 mb-2 d-block"></i>
+                            <% if (_statusFilter === 'pending') { %>
+                                Không có đơn hàng nào đang chờ duyệt thanh toán!
+                            <% } else { %>
+                                Không có đơn hàng nào trong mục này.
+                            <% } %>
+                        </td>
+                    </tr>
                 <% } %>
             </tbody>
         </table>
     </div>
 </div>
+
+<script>
+const CURRENT_STATUS_FILTER = '<%= _statusFilter %>';
+let lastKnownBookingIds = new Set(
+    Array.from(document.querySelectorAll('#bookingsTableBody tr[data-booking-id]')).map(r => Number(r.dataset.bookingId))
+);
+
+function escapeHtml(str) {
+    return String(str == null ? '' : str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function fmtDateTimeJs(val) {
+    if (!val) return '';
+    const d = new Date(val);
+    if (!isNaN(d.getTime())) {
+        const pad = n => String(n).padStart(2, '0');
+        return `${pad(d.getHours())}:${pad(d.getMinutes())} ${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`;
+    }
+    return String(val);
+}
+
+function showAdminToast(message, type = 'success') {
+    const container = document.getElementById('liveToastContainer');
+    if (!container) return;
+    const bgClass = type === 'success' ? 'text-bg-success' : (type === 'warning' ? 'text-bg-warning' : 'text-bg-danger');
+    const icon = type === 'success' ? 'fa-circle-check' : (type === 'warning' ? 'fa-bell' : 'fa-circle-exclamation');
+    const toastEl = document.createElement('div');
+    toastEl.className = `toast align-items-center ${bgClass} border-0 shadow mb-2 show`;
+    toastEl.setAttribute('role', 'alert');
+    toastEl.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body fw-semibold small">
+                <i class="fa-solid ${icon} me-2"></i>${escapeHtml(message)}
+            </div>
+            <button type="button" class="btn-close ${type === 'warning' ? '' : 'btn-close-white'} me-2 m-auto" onclick="this.closest('.toast').remove()"></button>
+        </div>
+    `;
+    container.appendChild(toastEl);
+    setTimeout(() => toastEl.remove(), 4500);
+}
+
+function updateCountsUI(counts) {
+    if (!counts) return;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    set('kpiTotal', counts.total);
+    set('kpiPending', counts.pending);
+    set('kpiPaid', counts.paid);
+    set('kpiCancelled', counts.cancelled);
+    set('filterTotal', counts.total);
+    set('filterPending', counts.pending);
+    set('filterPaid', counts.paid);
+    set('filterCancelled', counts.cancelled);
+    set('btnPendingCount', counts.pending);
+
+    const sb = document.getElementById('sidebarPendingBadge');
+    if (sb) {
+        sb.innerText = counts.pending;
+        if (counts.pending > 0) sb.classList.remove('d-none');
+        else sb.classList.add('d-none');
+    }
+}
+
+function renderBookingRow(b, isNew = false) {
+    const isAutoM = ['vnpay', 'momo', 'zalopay'].includes(b.payment_method);
+    const payBadgeClass = b.booking_type === 'pos'
+        ? 'bg-warning text-dark'
+        : (isAutoM ? 'bg-info-subtle text-primary border border-info-subtle' : 'bg-primary text-white');
+    const amtStr = Number(b.total_amount || 0).toLocaleString('vi-VN');
+
+    let statusHtml = '';
+    if (b.booking_status === 'cancelled' || b.payment_status === 'failed') {
+        statusHtml = '<span class="badge bg-danger text-white"><i class="fa-solid fa-circle-xmark me-1"></i> Đã hủy</span>';
+    } else if (b.payment_status === 'paid') {
+        statusHtml = '<span class="badge bg-success text-white"><i class="fa-solid fa-circle-check me-1"></i> Đã thanh toán</span>';
+        if (b.confirmed_by_name) {
+            statusHtml += `<div class="text-muted mt-1" style="font-size: 0.7rem;">Duyệt bởi: <strong>${escapeHtml(b.confirmed_by_name)}</strong>${b.confirmed_at ? ' (' + escapeHtml(fmtDateTimeJs(b.confirmed_at)) + ')' : ''}</div>`;
+        } else if (isAutoM) {
+            statusHtml += '<div class="text-success mt-1" style="font-size: 0.7rem;"><i class="fa-solid fa-bolt me-1"></i>Xác nhận tự động</div>';
+        }
+    } else if (b.payment_status === 'refunded') {
+        statusHtml = '<span class="badge bg-secondary text-white">Đã hoàn tiền</span>';
+    } else {
+        statusHtml = '<span class="badge bg-warning text-dark fw-bold"><i class="fa-solid fa-hourglass-half me-1"></i> Chờ xác nhận tiền</span>';
+    }
+
+    let actionHtml = '';
+    if (b.payment_status === 'pending' && b.booking_status !== 'cancelled') {
+        actionHtml = `
+            <button type="button" class="btn btn-success text-white btn-sm fw-bold me-1 shadow-sm"
+                    onclick="handleConfirmPayment(${Number(b.id)}, '${escapeHtml(b.booking_code)}', '${escapeHtml(amtStr)}', this)">
+                <i class="fa-solid fa-check-double me-1"></i> Đã nhận tiền
+            </button>
+            <button type="button" class="btn btn-outline-danger btn-sm" title="Từ chối / Hủy đơn"
+                    onclick="handleCancelBooking(${Number(b.id)}, '${escapeHtml(b.booking_code)}', this)">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        `;
+    } else {
+        actionHtml = `
+            <a href="/booking/success/${encodeURIComponent(b.booking_code)}" target="_blank" class="btn btn-outline-primary btn-sm fw-semibold" title="Xem chi tiết vé">
+                <i class="fa-solid fa-ticket me-1"></i> Xem vé
+            </a>
+        `;
+    }
+
+    return `
+        <tr class="small ${isNew ? 'table-warning' : ''}" data-booking-id="${Number(b.id)}" data-booking-code="${escapeHtml(b.booking_code)}">
+            <td>
+                <code class="text-primary fw-bold">${escapeHtml(b.booking_code)}</code>
+                <div class="text-muted" style="font-size: 0.72rem;">${Number(b.ticket_count || 0)} vé • ${escapeHtml((b.booking_type || '').toUpperCase())}</div>
+            </td>
+            <td>
+                <div class="fw-bold text-dark">${escapeHtml(b.customer_name)}</div>
+                <div class="text-muted" style="font-size: 0.75rem;">${escapeHtml(b.customer_phone || b.customer_email)}</div>
+            </td>
+            <td>
+                <div class="text-dark fw-semibold">${escapeHtml(b.movie_title)}</div>
+                <div class="text-muted" style="font-size: 0.75rem;">
+                    ${escapeHtml(b.room_name)} • <span class="text-danger fw-semibold">${escapeHtml(fmtDateTimeJs(b.start_time))}</span>
+                </div>
+            </td>
+            <td>
+                <span class="badge ${payBadgeClass}">${escapeHtml(b.payment_method_label || b.payment_method)}</span>
+                ${isAutoM ? '<span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 0.68rem;">Tự động</span>' : ''}
+                ${b.payment_note ? `<div class="text-muted mt-1" style="font-size: 0.72rem; max-width: 240px;">${escapeHtml(b.payment_note)}</div>` : ''}
+            </td>
+            <td class="text-danger fw-bold text-nowrap">${amtStr} đ</td>
+            <td>${statusHtml}</td>
+            <td class="text-muted text-nowrap">${escapeHtml(fmtDateTimeJs(b.created_at))}</td>
+            <td class="text-end text-nowrap">${actionHtml}</td>
+        </tr>
+    `;
+}
+
+async function refreshBookingsTable(announceNew = false) {
+    try {
+        const res = await fetch(`/admin/api/bookings?status=${encodeURIComponent(CURRENT_STATUS_FILTER)}`, {
+            headers: { 'Accept': 'application/json' },
+            cache: 'no-store'
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!data.success) return;
+
+        updateCountsUI(data.counts);
+
+        const tbody = document.getElementById('bookingsTableBody');
+        if (!tbody) return;
+
+        const incomingIds = new Set((data.bookings || []).map(b => Number(b.id)));
+        const newBookings = (data.bookings || []).filter(b => !lastKnownBookingIds.has(Number(b.id)));
+
+        if (!data.bookings || data.bookings.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-5">
+                        <i class="fa-solid fa-circle-check text-success fs-2 mb-2 d-block"></i>
+                        ${CURRENT_STATUS_FILTER === 'pending'
+                            ? 'Không có đơn hàng nào đang chờ duyệt thanh toán!'
+                            : 'Không có đơn hàng nào trong mục này.'}
+                    </td>
+                </tr>
+            `;
+        } else {
+            tbody.innerHTML = data.bookings.map(b => renderBookingRow(b, announceNew && !lastKnownBookingIds.has(Number(b.id)))).join('');
+        }
+
+        if (announceNew && newBookings.length > 0) {
+            const first = newBookings[0];
+            showAdminToast(`Có đơn hàng mới ${first.booking_code} (${Number(first.total_amount).toLocaleString('vi-VN')} đ)!`, 'warning');
+        }
+        lastKnownBookingIds = incomingIds;
+    } catch (e) {
+        // Bỏ qua lỗi mạng tạm thời
+    }
+}
+
+async function handleConfirmPayment(bookingId, bookingCode, amtStr, btn) {
+    if (!confirm(`Xác nhận đã nhận đủ ${amtStr} đ cho đơn ${bookingCode}?`)) return;
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Đang duyệt...';
+    }
+    try {
+        const res = await fetch(`/admin/bookings/${bookingId}/confirm-payment`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAdminToast(`Đã xác nhận nhận tiền cho đơn ${bookingCode}! Trạng thái đã chuyển sang Đã thanh toán.`, 'success');
+            if (data.counts) updateCountsUI(data.counts);
+            await refreshBookingsTable(false);
+        } else {
+            showAdminToast(data.message || 'Không thể duyệt đơn!', 'danger');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> Đã nhận tiền';
+            }
+        }
+    } catch (err) {
+        showAdminToast('Lỗi kết nối máy chủ khi duyệt đơn!', 'danger');
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check-double me-1"></i> Đã nhận tiền';
+        }
+    }
+}
+
+async function handleCancelBooking(bookingId, bookingCode, btn) {
+    if (!confirm(`Từ chối và hủy đơn ${bookingCode}? Ghế ngồi sẽ được giải phóng ngay.`)) return;
+    if (btn) btn.disabled = true;
+    try {
+        const res = await fetch(`/admin/bookings/${bookingId}/cancel`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason: 'Admin hủy đơn do chưa nhận được thanh toán' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            showAdminToast(`Đã hủy đơn ${bookingCode} và giải phóng ghế!`, 'danger');
+            if (data.counts) updateCountsUI(data.counts);
+            await refreshBookingsTable(false);
+        } else {
+            showAdminToast(data.message || 'Không thể hủy đơn!', 'danger');
+            if (btn) btn.disabled = false;
+        }
+    } catch (err) {
+        showAdminToast('Lỗi kết nối máy chủ khi hủy đơn!', 'danger');
+        if (btn) btn.disabled = false;
+    }
+}
+
+// Kết nối SSE thời gian thực (đơn mới từ Client hiện ngay lập tức, không cần F5)
+(function initAdminLiveStream() {
+    if (typeof EventSource !== 'undefined') {
+        const es = new EventSource('/admin/api/bookings/stream');
+        es.onmessage = (evt) => {
+            try {
+                const payload = JSON.parse(evt.data);
+                if (payload && payload.type && payload.type !== 'connected') {
+                    refreshBookingsTable(payload.type === 'created');
+                }
+            } catch (e) {}
+        };
+    }
+    // Fallback đồng bộ định kỳ mỗi 5 giây phòng khi kết nối SSE bị gián đoạn
+    setInterval(() => refreshBookingsTable(true), 5000);
+})();
+</script>
 
 <%- include('../layouts/admin-footer') %>

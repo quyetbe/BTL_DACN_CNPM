@@ -1,5 +1,6 @@
 const { query, get, run } = require('../database/db');
 const QRCode = require('qrcode');
+const { emitBookingEvent } = require('../services/bookingEvents');
 
 class Booking {
     static async createBooking({
@@ -10,8 +11,11 @@ class Booking {
         showtimeId,
         seats, // Array of { id, price, seat_code }
         combos = [], // Array of { id, quantity, price }
-        paymentMethod = 'vnpay',
+        paymentMethod = 'mbbank_qr',
         bookingType = 'online',
+        paymentStatus = null,
+        bookingStatus = null,
+        paymentNote = null,
         createdBy = null,
         sessionId = null
     }) {
@@ -20,6 +24,10 @@ class Booking {
         // Tính tổng tiền combo
         const comboTotal = combos.reduce((sum, c) => sum + (Number(c.price) * Number(c.quantity)), 0);
         const totalAmount = seatTotal + comboTotal;
+
+        // Mặc định: đặt online cần Admin xác nhận đã nhận tiền ('pending'); bán POS tại quầy thu tiền trực tiếp ('paid')
+        const resolvedPaymentStatus = paymentStatus || (bookingType === 'pos' ? 'paid' : 'pending');
+        const resolvedBookingStatus = bookingStatus || (resolvedPaymentStatus === 'paid' ? 'confirmed' : 'pending');
 
         // Sinh mã booking duy nhất
         const datePrefix = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -31,11 +39,15 @@ class Booking {
             INSERT INTO bookings (
                 booking_code, user_id, customer_name, customer_email, customer_phone,
                 showtime_id, total_amount, payment_method, payment_status, booking_status,
-                booking_type, created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'paid', 'confirmed', ?, ?)
+                booking_type, payment_note, confirmed_by, confirmed_at, created_by
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `, [
             bookingCode, userId, customerName, customerEmail, customerPhone,
-            showtimeId, totalAmount, paymentMethod, bookingType, createdBy
+            showtimeId, totalAmount, paymentMethod, resolvedPaymentStatus, resolvedBookingStatus,
+            bookingType, paymentNote,
+            resolvedPaymentStatus === 'paid' ? createdBy : null,
+            resolvedPaymentStatus === 'paid' ? new Date().toISOString().replace('T', ' ').substring(0, 19) : null,
+            createdBy
         ]);
         const bookingId = bookingRes.lastInsertRowid;
 
@@ -92,10 +104,22 @@ class Booking {
             await run('DELETE FROM seat_locks WHERE showtime_id = ? AND session_id = ?', [showtimeId, sessionId]);
         }
 
+        // Phát sự kiện thời gian thực tới Admin & Client
+        emitBookingEvent('created', {
+            bookingId,
+            bookingCode,
+            userId,
+            payment_status: resolvedPaymentStatus,
+            booking_status: resolvedBookingStatus,
+            payment_method: paymentMethod
+        });
+
         return {
             bookingId,
             bookingCode,
             totalAmount,
+            paymentStatus: resolvedPaymentStatus,
+            bookingStatus: resolvedBookingStatus,
             tickets: createdTickets
         };
     }
@@ -107,13 +131,15 @@ class Booking {
                    m.title as movie_title, m.poster_url, m.duration, m.age_rating,
                    r.room_name, r.screen_type,
                    c.name as cinema_name, c.address as cinema_address, c.city as cinema_city,
-                   u.full_name as user_name
+                   u.full_name as user_name,
+                   conf.full_name as confirmed_by_name
             FROM bookings b
             JOIN showtimes st ON b.showtime_id = st.id
             JOIN movies m ON st.movie_id = m.id
             JOIN rooms r ON st.room_id = r.id
             LEFT JOIN cinemas c ON r.cinema_id = c.id
             LEFT JOIN users u ON b.user_id = u.id
+            LEFT JOIN users conf ON b.confirmed_by = conf.id
             WHERE b.id = ?
         `, [id]);
     }
@@ -125,13 +151,15 @@ class Booking {
                    m.title as movie_title, m.poster_url, m.duration, m.age_rating,
                    r.room_name, r.screen_type,
                    c.name as cinema_name, c.address as cinema_address, c.city as cinema_city,
-                   u.full_name as user_name
+                   u.full_name as user_name,
+                   conf.full_name as confirmed_by_name
             FROM bookings b
             JOIN showtimes st ON b.showtime_id = st.id
             JOIN movies m ON st.movie_id = m.id
             JOIN rooms r ON st.room_id = r.id
             LEFT JOIN cinemas c ON r.cinema_id = c.id
             LEFT JOIN users u ON b.user_id = u.id
+            LEFT JOIN users conf ON b.confirmed_by = conf.id
             WHERE b.booking_code = ?
         `, [code]);
     }
@@ -171,19 +199,136 @@ class Booking {
         `, [bookingId]);
     }
 
-    static async getAll() {
+    static async getAll(statusFilter = null) {
+        let whereClause = '';
+        const params = [];
+        if (statusFilter === 'pending') {
+            whereClause = "WHERE b.payment_status = 'pending' AND b.booking_status != 'cancelled'";
+        } else if (statusFilter === 'paid') {
+            whereClause = "WHERE b.payment_status = 'paid' AND b.booking_status != 'cancelled'";
+        } else if (statusFilter === 'cancelled') {
+            whereClause = "WHERE b.booking_status = 'cancelled' OR b.payment_status = 'failed'";
+        }
+
         return await query(`
             SELECT b.*, 
                    m.title as movie_title,
                    r.room_name,
                    st.start_time,
+                   conf.full_name as confirmed_by_name,
                    (SELECT COUNT(*) FROM tickets WHERE booking_id = b.id) as ticket_count
             FROM bookings b
             JOIN showtimes st ON b.showtime_id = st.id
             JOIN movies m ON st.movie_id = m.id
             JOIN rooms r ON st.room_id = r.id
-            ORDER BY b.created_at DESC
+            LEFT JOIN users conf ON b.confirmed_by = conf.id
+            ${whereClause}
+            ORDER BY CASE WHEN b.payment_status = 'pending' AND b.booking_status != 'cancelled' THEN 0 ELSE 1 END, b.created_at DESC
+        `, params);
+    }
+
+    static async getStatusCounts() {
+        const row = await get(`
+            SELECT
+                COUNT(*) as total,
+                SUM(CASE WHEN payment_status = 'pending' AND booking_status != 'cancelled' THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN payment_status = 'paid' AND booking_status != 'cancelled' THEN 1 ELSE 0 END) as paid,
+                SUM(CASE WHEN booking_status = 'cancelled' OR payment_status = 'failed' THEN 1 ELSE 0 END) as cancelled
+            FROM bookings
         `);
+        return {
+            total: Number(row?.total || 0),
+            pending: Number(row?.pending || 0),
+            paid: Number(row?.paid || 0),
+            cancelled: Number(row?.cancelled || 0)
+        };
+    }
+
+    static async confirmPayment(bookingId, adminUserId) {
+        const booking = await get('SELECT id, payment_status, booking_status FROM bookings WHERE id = ?', [bookingId]);
+        if (!booking) {
+            return { success: false, message: 'Không tìm thấy đơn hàng!' };
+        }
+        if (booking.booking_status === 'cancelled') {
+            return { success: false, message: 'Không thể duyệt đơn hàng đã bị hủy!' };
+        }
+        if (booking.payment_status === 'paid') {
+            return { success: true, alreadyPaid: true, message: 'Đơn hàng đã ở trạng thái đã thanh toán!' };
+        }
+
+        await run(`
+            UPDATE bookings
+            SET payment_status = 'paid',
+                booking_status = 'confirmed',
+                confirmed_by = ?,
+                confirmed_at = NOW()
+            WHERE id = ?
+        `, [adminUserId, bookingId]);
+
+        const updated = await this.findById(bookingId);
+        if (updated) {
+            emitBookingEvent('confirmed', {
+                bookingId: updated.id,
+                bookingCode: updated.booking_code,
+                userId: updated.user_id,
+                payment_status: updated.payment_status,
+                booking_status: updated.booking_status,
+                confirmed_at: updated.confirmed_at,
+                confirmed_by_name: updated.confirmed_by_name
+            });
+        }
+
+        return {
+            success: true,
+            booking: updated,
+            message: 'Đã xác nhận nhận tiền! Đơn hàng đã chuyển sang trạng thái Đã thanh toán.'
+        };
+    }
+
+    static async cancelBooking(bookingId, adminUserId, reason = 'Quản trị viên hủy đơn do chưa nhận được thanh toán') {
+        const booking = await get('SELECT id, payment_status, booking_status FROM bookings WHERE id = ?', [bookingId]);
+        if (!booking) {
+            return { success: false, message: 'Không tìm thấy đơn hàng!' };
+        }
+        if (booking.booking_status === 'cancelled') {
+            return { success: true, message: 'Đơn hàng đã bị hủy trước đó!' };
+        }
+
+        await run(`
+            UPDATE bookings
+            SET payment_status = CASE WHEN payment_status = 'paid' THEN 'refunded' ELSE 'failed' END,
+                booking_status = 'cancelled',
+                payment_note = ?,
+                confirmed_by = ?,
+                confirmed_at = NOW()
+            WHERE id = ?
+        `, [reason, adminUserId, bookingId]);
+
+        await run(`
+            UPDATE tickets
+            SET status = 'cancelled'
+            WHERE booking_id = ? AND status = 'unused'
+        `, [bookingId]);
+
+        const updated = await this.findById(bookingId);
+        if (updated) {
+            emitBookingEvent('cancelled', {
+                bookingId: updated.id,
+                bookingCode: updated.booking_code,
+                userId: updated.user_id,
+                payment_status: updated.payment_status,
+                booking_status: updated.booking_status,
+                payment_note: updated.payment_note,
+                confirmed_at: updated.confirmed_at,
+                confirmed_by_name: updated.confirmed_by_name
+            });
+        }
+
+        return {
+            success: true,
+            booking: updated,
+            message: 'Đã hủy đơn hàng và giải phóng ghế ngồi!'
+        };
     }
 
     // Thống kê tổng hợp cho Dashboard của Manager

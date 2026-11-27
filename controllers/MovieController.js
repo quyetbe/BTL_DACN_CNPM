@@ -1,5 +1,6 @@
 const Movie = require('../models/Movie');
 const Showtime = require('../models/Showtime');
+const { get } = require('../database/db');
 
 class MovieController {
     static async detail(req, res) {
@@ -52,7 +53,15 @@ class MovieController {
                 }
             }
 
-            const showtimes = await Showtime.getByMovie(movieId, selectedDate);
+            // Lọc lịch chiếu ĐÚNG theo cơ sở rạp đã chọn (query param hoặc cookie)
+            const rawCinemaId = req.query.cinema_id || req.cookies.selectedCinemaId || null;
+            const selectedCinemaId = rawCinemaId ? Number(rawCinemaId) : null;
+            let currentCinema = null;
+            if (selectedCinemaId) {
+                currentCinema = await get('SELECT * FROM cinemas WHERE id = ?', [selectedCinemaId]);
+            }
+
+            const showtimes = await Showtime.getByMovie(movieId, selectedDate, selectedCinemaId);
 
             // Nhóm suất chiếu theo định dạng phòng (IMAX, 3D, 2D)
             const groupedShowtimes = {};
@@ -78,6 +87,7 @@ class MovieController {
                 selectedDate,
                 groupedShowtimes,
                 totalShowtimes: showtimes.length,
+                currentCinema,
                 breadcrumbs
             });
         } catch (err) {
